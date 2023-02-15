@@ -9,7 +9,7 @@ export type BluetoothPeripheral = Pick<
   'id' | 'uuid' | 'address' | 'addressType' | 'advertisement' | 'state'
 >
 
-export interface RuuviData {
+export interface RuuviBluetoothData {
   readonly data: Uint8Array
   readonly timestamp: Date
   readonly peripheral: BluetoothPeripheral
@@ -46,7 +46,7 @@ export class BluetoothManager {
       const ruuviData = extractRuuviData(manufacturerData)
       if (ruuviData) {
         const ruuviTimestamp = new Date()
-        this.publish(this.toRuuviData(ruuviData, ruuviTimestamp, peripheral))
+        this.publish(this.toRuuviBluetoothData(ruuviData, ruuviTimestamp, peripheral))
       }
     })
 
@@ -76,7 +76,7 @@ export class BluetoothManager {
     })
   }
 
-  private toRuuviData(data: Uint8Array, timestamp: Date, peripheral: noble.Peripheral): RuuviData {
+  private toRuuviBluetoothData(data: Uint8Array, timestamp: Date, peripheral: noble.Peripheral): RuuviBluetoothData {
     return { data, timestamp, peripheral: this.toBluetoothPeripheral(peripheral) }
   }
 
@@ -91,7 +91,7 @@ export class BluetoothManager {
     }
   }
 
-  private publish(data: RuuviData) {
+  private publish(data: RuuviBluetoothData) {
     this._publisher.push(data)
   }
 

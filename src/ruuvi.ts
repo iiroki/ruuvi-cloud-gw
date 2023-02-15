@@ -9,7 +9,7 @@ export const isManufacturerRuuviInnovationsLtd = (manufacturerId: Uint8Array) =>
 )
 
 /**
- * Extracts Ruuvi data from `manufacturerData` if the manufacturer is _"Ruuvi Innovations"_.
+ * Extracts Ruuvi data from `manufacturerData` if the manufacturer is _"Ruuvi Innovations Ltd"_.
  *
  * Returns `null` if there is no Ruuvi data to extract.
  */

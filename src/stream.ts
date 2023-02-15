@@ -1,9 +1,71 @@
+import { Point, WriteApi } from '@influxdata/influxdb-client'
 import { Readable, Transform, Writable } from 'node:stream'
 import { TransformCallback } from 'stream'
-import { RuuviData } from './bluetooth'
+import { RuuviBluetoothData } from './bluetooth'
 import { getLogger } from './logger'
-import { RuuviBroadcast, TelemetryPayload } from './model'
+import { RuuviBroadcast } from './model'
 import { getRuuviParser } from './ruuvi'
+
+export class RuuviInfluxTransform extends Transform {
+  private readonly log = getLogger('RuuviInfluxTransform')
+  private readonly measurementSequences: Map<string, number> = new Map()
+
+  constructor(private readonly influxMeasurement = 'ruuvi') {
+    super({ readableObjectMode: true, writableObjectMode: true })
+    this.log.debug('Initialized')
+  }
+
+  _transform(chunk: RuuviBluetoothData, _: BufferEncoding, callback: TransformCallback): void {
+    const { data, peripheral, timestamp } = chunk
+    const parser = getRuuviParser(data)
+    if (parser) {
+      const parsed = parser(data)
+      if (this.measurementExists(parsed, peripheral.id)) {
+        callback() // No need to process the same measurement again
+        return
+      }
+
+      // TODO: Missed any Ruuvi measurements?
+
+      const { id, mac, ...fields } = parsed
+      const point = new Point(this.influxMeasurement).timestamp(timestamp)
+
+      // InfluxDB tags
+      point.tag('btPeripheralId', peripheral.id)
+      point.tag('btPeripheralName', peripheral.advertisement.localName)
+
+      if (id) { // Do not include 0!
+        point.tag('id', id.toString())
+      }
+
+      if (mac) {
+        point.tag('mac', mac.toString())
+      }
+
+      // InfluxDB fields
+      Object.entries(fields).forEach(([key, value]) => {
+        if (typeof value === 'number') {
+          point.floatField(key, value)
+        }
+      })
+
+      callback(null, point)
+    } else {
+      this.log.error(`No RuuviParser for format: ${data}`)
+      callback()
+    }
+  }
+
+  private measurementExists(parsed: RuuviBroadcast, peripheralId: string) {
+    const { measurementSequence } = parsed
+    if (!measurementSequence) {
+      return false
+    }
+
+    const current = this.measurementSequences.get(peripheralId)
+    return current && current >= measurementSequence
+  }
+}
 
 export class IntervalCacheTransform extends Transform {
   private readonly log = getLogger('IntervalCache')
@@ -44,50 +106,17 @@ export class IntervalCacheTransform extends Transform {
   }
 }
 
-export class RuuviParserTransform extends Transform {
-  private readonly log = getLogger('RuuviParserTransform')
-  private readonly measurementSequences: Map<string, number> = new Map()
+export class InfluxWritable extends Writable {
+  private readonly log = getLogger('InfluxWritable')
 
-  constructor() {
-    super({ readableObjectMode: true, writableObjectMode: true })
-    this.log.debug('Initialized')
+  constructor(private readonly writeApi: WriteApi) {
+    super()
   }
 
-  _transform(chunk: RuuviData, _: BufferEncoding, callback: TransformCallback): void {
-    const parser = getRuuviParser(chunk.data)
-    if (parser) {
-      const parsed = parser(chunk.data)
-      const peripheralId = chunk.peripheral.id
-      if (this.measurementExists(parsed, peripheralId)) {
-        callback() // No need to process the same measurement again
-        return
-      }
-
-      // TODO: Missed any Ruuvi measurements?
-
-      const payload: TelemetryPayload = {
-        data: {}, // TODO
-        meta: {
-          peripheralName: chunk.peripheral.advertisement.localName
-        },
-        ts: chunk.timestamp.toISOString()
-      }
-
-      callback(null, payload)
-    } else {
-      this.log.error(`No RuuviParser for format: ${chunk.data}`)
-      callback()
-    }
-  }
-
-  private measurementExists(parsed: RuuviBroadcast, peripheralId: string) {
-    const { measurementSequence } = parsed
-    if (!measurementSequence) {
-      return false
-    }
-
-    const current = this.measurementSequences.get(peripheralId)
-    return current && current >= measurementSequence
+  _write(chunk: Point[], _: BufferEncoding, callback: () => void): void {
+    this.log.debug(`Writing to InfluxDB: ${chunk.length} points`)
+    this.writeApi.writePoints(chunk)
+    callback()
   }
 }
 
@@ -95,10 +124,3 @@ export const createDefaultReadable = () => new Readable({
   objectMode: true,
   read: () => {/* NOP */}
 })
-
-export const createRuuviDataPipeline = (publisher: Readable, cacheIntervalMs: number) => {
-  publisher
-    .pipe(new RuuviParserTransform())
-    .pipe(new IntervalCacheTransform(cacheIntervalMs))
-    // TODO: InfluxDB Writable
-}

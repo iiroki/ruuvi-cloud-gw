@@ -1,5 +1,4 @@
 import fs from 'node:fs'
-import os from 'node:os'
 import { z } from 'zod'
 import { GatewayConfig } from './model'
 
@@ -11,14 +10,10 @@ export const readConfigFromFile = (): GatewayConfig => {
   }
 
   const json = JSON.parse(fs.readFileSync(CONFIG_PATH).toString())
-  return {
-    host: os.hostname().toLowerCase(),
-    ...MeasurementHubConfigValidator.parse(json)
-  }
+  return MeasurementHubConfigValidator.parse(json)
 }
 
 const MeasurementHubConfigValidator: z.ZodType<Omit<GatewayConfig, 'host'>> = z.object({
-  id: z.string().min(3),
   bluetoothConfig: z.object({
     serviceUuids: z.string().array().optional(),
     ruuviTags: z.array(
@@ -27,6 +22,14 @@ const MeasurementHubConfigValidator: z.ZodType<Omit<GatewayConfig, 'host'>> = z.
         localName: z.string().optional()
       })
     )
+  }),
+  influxConfig: z.object({
+    url: z.string().url(),
+    token: z.string(),
+    bucket: z.string(),
+    org: z.string(),
+    measurement: z.string().optional(),
+    defaultTags: z.record(z.string()).optional()
   }),
   cacheIntervalMs: z.number().optional()
 })
