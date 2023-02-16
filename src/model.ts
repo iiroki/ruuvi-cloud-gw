@@ -14,13 +14,16 @@ export interface RuuviTagFilter {
 }
 
 /**
- * Bluetooth/Ruuvi configuration for the Measurement Hub.
+ * Bluetooth/Ruuvi configuration for the gateway.
  */
 export interface BluetoothConfig {
   readonly serviceUuids?: string[]
   // readonly ruuviTags: RuuviTagFilter[]
 }
 
+/**
+ * InfluxDB configuration for the gateway.
+ */
 export interface InfluxConfig {
   readonly url: string
   readonly token: string
@@ -34,10 +37,10 @@ export interface InfluxConfig {
 }
 
 /**
- * Main configuration for the application.
+ * Main configuration for the gateway.
  */
 export interface GatewayConfig {
-  readonly bluetoothConfig: BluetoothConfig
   readonly influxConfig: InfluxConfig
+  readonly bluetoothConfig?: BluetoothConfig
   readonly cacheIntervalMs?: number
 }

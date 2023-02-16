@@ -27,7 +27,7 @@ export class BluetoothManager {
   private readonly log = getLogger('BluetoothManager')
   private readonly _publisher = createDefaultReadable()
 
-  constructor(private readonly config: BluetoothConfig) {
+  constructor(private readonly config: BluetoothConfig = {}) {
     noble.on('scanStart', () => this.log.info('Starting Bluetooth scanning...'))
     noble.on('scanStop', () => this.log.info('Stopped Bluetooth scanning.'))
 

@@ -2,7 +2,7 @@
 
 _A big shoutout to [Ruuvi](https://ruuvi.com/) and their open-source practices for making this project possible!_
 
-**_Ruuvi-InfluxDB Gateway_** is a simple gateway to collect data from RuuviTags and send them to InfluxDB.
+**_Ruuvi-InfluxDB Gateway_** is a simple gateway to collect data from RuuviTags and send them to InfluxDB implemented with TypeScript and Node.js.
 
 **Features:**
 - Collect data from RuuviTags
@@ -18,7 +18,45 @@ _A big shoutout to [Ruuvi](https://ruuvi.com/) and their open-source practices f
 
 ## Quickstart
 
-TODO: Instructions
+**Prerequisites:**
+- [Node.js](https://nodejs.org/en/)
+- [PM2](https://pm2.keymetrics.io/) (OPTIONAL FOR "PRODUCTION")
+
+### Development
+
+1. Install npm dependencies:
+    ```bash
+    npm i
+    ```
+
+2. Create a JSON configuration file and enter InfluxDB configuration.
+    - By default, configuration is read from `config.json` in the root directory.
+    - See [Configuration](#configuration) for more information.
+
+3. Build and start the gateway in development mode (prettier logging):
+    ```bash
+    npm run dev
+    ```
+
+### Production
+
+In "production", PM2 is used to run the gateway as a daemon.
+The configuration is handled the same way as in development mode.
+
+1. Install npm production dependencies:
+    ```bash
+    npm run build:prod
+    ```
+
+2. Start the gateway with PM2:
+    ```bash
+    pm2 start npm --name 'ruuvi-influxdb-gw' -- start
+    ```
+
+3. (OPTIONAL) Check that the gateway is running:
+    ```bash
+    pm2 list
+    ```
 
 ## Configuration
 
@@ -48,16 +86,6 @@ TODO: Description
 }
 ```
 
-## Licenses
+## License
 
 **MIT License** Copyright (c) 2023 Iiro Kiviluoma
-
-### Libraries
-
-| Library | License |
-| --- | --- |
-| Ruuvi / ojousima | BSD-3 |
-| InfluxDB | MIT |
-| Noble | MIT |
-| Pino | MIT |
-| Zod | MIT |

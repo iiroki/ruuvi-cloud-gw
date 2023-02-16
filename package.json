@@ -1,5 +1,5 @@
 {
-  "name": "ruuvi-influxdb-gq",
+  "name": "ruuvi-influxdb-gw",
   "version": "0.0.1",
   "description": "Ruuvi-InfluxDB Gateway implemented with Node.js",
   "author": "iiroki",

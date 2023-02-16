@@ -1,4 +1,4 @@
-import fs from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { z } from 'zod'
 import { GatewayConfig } from './model'
 
@@ -9,11 +9,15 @@ export const readConfigFromFile = (): GatewayConfig => {
     return {} as any // Disable in tests!
   }
 
-  const json = JSON.parse(fs.readFileSync(CONFIG_PATH).toString())
-  return MeasurementHubConfigValidator.parse(json)
+  if (!existsSync(CONFIG_PATH)) {
+    throw new Error(`Config file not found: ${CONFIG_PATH}`)
+  }
+
+  const json = JSON.parse(readFileSync(CONFIG_PATH).toString())
+  return GatewayConfigValidator.parse(json)
 }
 
-const MeasurementHubConfigValidator: z.ZodType<Omit<GatewayConfig, 'host'>> = z.object({
+const GatewayConfigValidator: z.ZodType<Omit<GatewayConfig, 'host'>> = z.object({
   bluetoothConfig: z.object({
     serviceUuids: z.string().array().optional(),
     ruuviTags: z.array(
@@ -21,8 +25,8 @@ const MeasurementHubConfigValidator: z.ZodType<Omit<GatewayConfig, 'host'>> = z.
         uuid: z.string().optional(),
         localName: z.string().optional()
       })
-    )
-  }),
+    ).optional()
+  }).optional(),
   influxConfig: z.object({
     url: z.string().url(),
     token: z.string(),
