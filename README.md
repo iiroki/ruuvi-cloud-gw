@@ -30,7 +30,6 @@ _A big shoutout to [Ruuvi](https://ruuvi.com/) and their open-source practices f
     ```
 
 2. Create a JSON configuration file and enter InfluxDB configuration.
-    - By default, configuration is read from `config.json` in the root directory.
     - See [Configuration](#configuration) for more information.
 
 3. Build and start the gateway in development mode (prettier logging):
@@ -60,7 +59,24 @@ The configuration is handled the same way as in development mode.
 
 ## Configuration
 
-TODO: Description
+By default, configuration is read from `config.json` in the root directory.
+This can be changed by setting the `CONFIG_PATH` env variable.
+
+**Configuration options:**
+| Config | Key | Description | Type | Required |
+| --- | --- | --- | --- | :---: |
+| `bluetoothConfig` | - | Bluetooth/Ruuvi configuration | See below | &cross; |
+| `bluetoothConfig` | `serviceUuids` | Bluetooth service UUIDs to scan for | `string[]` | &cross; |
+| `influxConfig` | - | InfluxDB configuration | See below | &check; |
+| `influxConfig` | `url` | Database URL | `string` | &check; |
+| `influxConfig` | `token` | API token | `string` | &check; |
+| `influxConfig` | `bucket` | Bucket | `string` | &check; |
+| `influxConfig` | `org` | Organization | `string` | &check; |
+| `influxConfig` | `measurement` | Measurement  | `string` | &check; |
+| `influxConfig` | `defaultTags` | Tags to be included with every data point  | `Record<string, string>` | &cross; |
+| `influxConfig` | `batchSize` | Max number of data points in a batch | `number` | &cross; |
+| `influxConfig` | `flushIntervalMs` | Interval between forceful data flushes (ms) | `number` | &cross; |
+| `influxConfig` | `gzipThreshold` | Batches larger than the value will be gzipped | `number` | &cross; |
 
 **Example config:**
 
