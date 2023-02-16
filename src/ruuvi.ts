@@ -1,4 +1,4 @@
-import { df3parser, df5parser, dfacparser, dfbaparser, } from 'ojousima.ruuvi_endpoints.ts'
+import { df3parser, df5parser, dfacparser, dfbaparser } from 'ojousima.ruuvi_endpoints.ts'
 import { RuuviParser } from './model'
 
 /**

@@ -16,6 +16,7 @@ process.on('SIGINT', async () => {
     destoyed = true
     log.debug('Performing shutdown routine...')
     await btManager.destroy()
+    await influxWriteApi.close()
     log.info('Ready for shutdown.')
     process.exit(0)
   }
@@ -23,9 +24,9 @@ process.on('SIGINT', async () => {
 
 // Setup data pipeline
 btManager.publisher
-    .pipe(new RuuviInfluxTransform(config.influxConfig.measurement))
-    .pipe(new IntervalCacheTransform(config.cacheIntervalMs))
-    .pipe(new InfluxWritable(influxWriteApi))
+  .pipe(new RuuviInfluxTransform(config.influxConfig.measurement))
+  .pipe(new IntervalCacheTransform(config.cacheIntervalMs))
+  .pipe(new InfluxWritable(influxWriteApi))
 
 // Start the application
 log.info('Ready to start.')

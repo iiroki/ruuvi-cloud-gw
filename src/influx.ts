@@ -1,5 +1,5 @@
-import { InfluxDB } from '@influxdata/influxdb-client'
 import os from 'node:os'
+import { InfluxDB } from '@influxdata/influxdb-client'
 import { InfluxConfig } from './model'
 
 export const createInfluxWriteApi = (influxConfig: InfluxConfig) => {

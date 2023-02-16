@@ -1,6 +1,5 @@
+import { Readable, Transform, TransformCallback, Writable } from 'node:stream'
 import { Point, WriteApi } from '@influxdata/influxdb-client'
-import { Readable, Transform, Writable } from 'node:stream'
-import { TransformCallback } from 'stream'
 import { RuuviBluetoothData } from './bluetooth'
 import { getLogger } from './logger'
 import { RuuviBroadcast } from './model'

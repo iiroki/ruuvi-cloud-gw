@@ -5,8 +5,8 @@ import { extractRuuviData } from './ruuvi'
 import { createDefaultReadable } from './stream'
 
 export type BluetoothPeripheral = Pick<
-  noble.Peripheral,
-  'id' | 'uuid' | 'address' | 'addressType' | 'advertisement' | 'state'
+  noble.Peripheral,                                                     // eslint-disable-line
+  'id' | 'uuid' | 'address' | 'addressType' | 'advertisement' | 'state' // eslint-disable-line
 >
 
 export interface RuuviBluetoothData {
