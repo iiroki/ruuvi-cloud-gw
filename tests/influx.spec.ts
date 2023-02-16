@@ -1,4 +1,4 @@
-describe('Influx Write API', () => {
+describe.skip('Influx Write API', () => {
   it('URL and token are set properly', () => {
     // TODO
   })

@@ -20,32 +20,40 @@ export class RuuviInfluxTransform extends Transform {
     const parser = getRuuviParser(data)
     if (parser) {
       const parsed = parser(data)
-      if (this.measurementExists(parsed, peripheral.id)) {
+      if (this.ruuviMeasurementExists(parsed, peripheral.id)) {
         callback() // No need to process the same measurement again
         return
       }
 
-      // TODO: Missed any Ruuvi measurements?
+      // TODO: Check missed Ruuvi measurements?
 
-      const { id, mac, ...fields } = parsed
+      const { id, mac, dataFormat, ...fields } = parsed
       const point = new Point(this.influxMeasurement).timestamp(timestamp)
 
-      // InfluxDB tags
+      // InfluxDB tags (Bluetooth + Ruuvi metadata)
       point.tag('btPeripheralId', peripheral.id)
       point.tag('btPeripheralName', peripheral.advertisement.localName)
 
-      if (id) { // Do not include 0!
+      if (id !== null) {
         point.tag('id', id.toString())
       }
 
-      if (mac) {
+      if (mac !== null) {
         point.tag('mac', mac.toString())
       }
 
-      // InfluxDB fields
+      if (dataFormat !== null) {
+        point.tag('dataFormat', dataFormat.toString())
+      }
+
+      // InfluxDB fields (numeric Ruuvi values)
       Object.entries(fields).forEach(([key, value]) => {
         if (typeof value === 'number') {
-          point.floatField(key, value)
+          if (Number.isInteger(value)) {
+            point.intField(key, value)
+          } else {
+            point.floatField(key, value)
+          }
         }
       })
 
@@ -56,7 +64,7 @@ export class RuuviInfluxTransform extends Transform {
     }
   }
 
-  private measurementExists(parsed: RuuviBroadcast, peripheralId: string) {
+  private ruuviMeasurementExists(parsed: RuuviBroadcast, peripheralId: string) {
     const { measurementSequence } = parsed
     if (!measurementSequence) {
       return false
