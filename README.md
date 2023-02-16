@@ -1,6 +1,24 @@
 # Ruuvi-InfluxDB Gateway
 
-TODO
+_A big shoutout to [Ruuvi](https://ruuvi.com/) and their open-source practices for making this project possible!_
+
+**_Ruuvi-InfluxDB Gateway_** is a simple gateway to collect data from RuuviTags and send them to InfluxDB.
+
+**Features:**
+- Collect data from RuuviTags
+- Transform Ruuvi data to InfluxDB-compatible format
+- Send data to InfluxDB
+- Various configuration options (see [Configuration](#configuration))
+
+**Supported Ruuvi data formats:**
+- [Data format 5](https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-5-rawv2)
+- [Data format 3](https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-3-rawv1)
+- Acceleration
+- Battery
+
+## Quickstart
+
+TODO: Instructions
 
 ## Configuration
 
@@ -11,7 +29,7 @@ TODO: Description
 ```json
 {
   "bluetoothConfig": {
-    "serviceUuids": ["fe9a"],
+    "serviceUuids": ["fe9a"]
   },
   "influxConfig": {
     "url": "http://localhost:8086",
@@ -31,6 +49,10 @@ TODO: Description
 ```
 
 ## Licenses
+
+**MIT License** Copyright (c) 2023 Iiro Kiviluoma
+
+### Libraries
 
 | Library | License |
 | --- | --- |

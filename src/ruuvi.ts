@@ -40,6 +40,6 @@ export const getRuuviParser = (data: Uint8Array): RuuviParser => {
   } else if (isRuuviDffeData(data)) {
     throw new Error('Ruuvi DFFE data format not supported!')
   } else {
-    throw new Error(`Unknown Ruuvi data format: ${data}`)
+    throw new Error(`Unsupported Ruuvi data format: ${data}`)
   }
 }
