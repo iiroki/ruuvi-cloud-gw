@@ -59,6 +59,21 @@ The configuration is handled the same way as in development mode.
     pm2 list
     ```
 
+## Data flow
+
+When the gateway receives data from RuuviTags, it transforms the data to InfluxDB data points using the following rules ([RuuviInfluxTransform](./src//stream.ts)):
+- **Tags:**
+    - Default tags from the configuration
+    - `host`: Operating system host name
+    - `btPeripheralId`: RuuviTag Bluetooth peripheral ID
+    - `btPeripheralName`: RuuviTag Bluetooth peripheral local name
+    - `id`: RuuviTag ID
+    - `mac`: RuuviTag MAC
+    - `dataFormat`: RuuviTag data format
+- **Fields:** All the other values included in RuuviTag advertisement broadcasts.
+- **Timestamp:** Timestamp when [`BluetoothManager`](./src/bluetooth.ts) received the data
+- **Measurement:** Measurement name from the configuration
+
 ## Configuration
 
 By default, configuration is read from `config.json` in the root directory.
