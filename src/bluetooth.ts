@@ -17,7 +17,7 @@ export interface RuuviBluetoothData {
 
 /**
  * `BluetoothManager` listens for RuuviTag advertisements and publishes
- * them to the `publisher` stream in `RuuviData` format.
+ * them to the `publisher` stream in `RuuviBluetoothData` format.
  *
  * **TODO:**
  * The RuuviTag advertisements whose values are published can be configured
@@ -31,7 +31,7 @@ export class BluetoothManager {
     noble.on('scanStart', () => this.log.info('Starting Bluetooth scanning...'))
     noble.on('scanStop', () => this.log.info('Stopped Bluetooth scanning.'))
 
-    // TODO: Init RuuviTag filter
+    // TODO: RuuviTag filter
 
     this.log.debug('Initialized')
   }

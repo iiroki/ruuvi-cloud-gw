@@ -1,8 +1,8 @@
-import { Point } from '@influxdata/influxdb-client'
 import { PassThrough, Readable } from 'node:stream'
+import { Point } from '@influxdata/influxdb-client'
+import { TEST_RUUVI_DF5, TEST_RUUVI_DF5_PARSED, TEST_RUUVI_PERIPHERAL } from './helpers/mock-data'
 import { RuuviBluetoothData } from '../src/bluetooth'
 import { createDefaultReadable, RuuviInfluxTransform } from '../src/stream'
-import { MOCK_RUUVI_DF5, MOCK_RUUVI_DF5_PARSED, MOCK_RUUVI_PERIPHERAL } from './helpers/mock-data'
 
 let publisher: Readable
 let pass: PassThrough
@@ -22,13 +22,13 @@ describe('RuuviInfluxTransform', () => {
     const promise = new Promise<Point>(r => pass.on('data', data => r(data)))
 
     publisher.push({
-      data: MOCK_RUUVI_DF5,
+      data: TEST_RUUVI_DF5,
       timestamp: new Date(2022, 1, 28, 21),
-      peripheral: MOCK_RUUVI_PERIPHERAL
+      peripheral: TEST_RUUVI_PERIPHERAL
     } as RuuviBluetoothData)
 
     const { fields } = await promise
-    const { id, mac, dataFormat, ...values } = MOCK_RUUVI_DF5_PARSED
+    const { id, mac, dataFormat, ...values } = TEST_RUUVI_DF5_PARSED
     for (const [key] of Object.entries(values).filter(e => typeof e[1] === 'number')) {
       expect(fields).toHaveProperty(key)
     }
@@ -39,9 +39,9 @@ describe('RuuviInfluxTransform', () => {
     const promise = new Promise<Point>(r => pass.on('data', data => r(data)))
 
     publisher.push({
-      data: MOCK_RUUVI_DF5,
+      data: TEST_RUUVI_DF5,
       timestamp: new Date(2022, 1, 28, 21),
-      peripheral: MOCK_RUUVI_PERIPHERAL
+      peripheral: TEST_RUUVI_PERIPHERAL
     } as RuuviBluetoothData)
 
     const { fields } = await promise
@@ -55,16 +55,16 @@ describe('RuuviInfluxTransform', () => {
     const promise = new Promise<Point>(r => pass.on('data', data => r(data)))
 
     publisher.push({
-      data: MOCK_RUUVI_DF5,
+      data: TEST_RUUVI_DF5,
       timestamp: new Date(2022, 1, 28, 21),
-      peripheral: MOCK_RUUVI_PERIPHERAL
+      peripheral: TEST_RUUVI_PERIPHERAL
     } as RuuviBluetoothData)
 
     const transformed = await promise
     const tags = transformed['tags']
-    expect(tags).toHaveProperty('id', MOCK_RUUVI_DF5_PARSED.id.toString())
-    expect(tags).toHaveProperty('mac', MOCK_RUUVI_DF5_PARSED.mac?.toString())
-    expect(tags).toHaveProperty('dataFormat', MOCK_RUUVI_DF5_PARSED.dataFormat?.toString())
+    expect(tags).toHaveProperty('id', TEST_RUUVI_DF5_PARSED.id.toString())
+    expect(tags).toHaveProperty('mac', TEST_RUUVI_DF5_PARSED.mac?.toString())
+    expect(tags).toHaveProperty('dataFormat', TEST_RUUVI_DF5_PARSED.dataFormat?.toString())
   })
 
   it('Ruuvi Bluetooth peripheral ID and name are inserted into Influx tags', async () => {
@@ -72,15 +72,15 @@ describe('RuuviInfluxTransform', () => {
     const promise = new Promise<Point>(r => pass.on('data', data => r(data)))
 
     publisher.push({
-      data: MOCK_RUUVI_DF5,
+      data: TEST_RUUVI_DF5,
       timestamp: new Date(2022, 1, 28, 21),
-      peripheral: MOCK_RUUVI_PERIPHERAL
+      peripheral: TEST_RUUVI_PERIPHERAL
     } as RuuviBluetoothData)
 
     const transformed = await promise
     const tags = transformed['tags']
-    expect(tags).toHaveProperty('btPeripheralId', MOCK_RUUVI_PERIPHERAL.id)
-    expect(tags).toHaveProperty('btPeripheralName', MOCK_RUUVI_PERIPHERAL.advertisement.localName)
+    expect(tags).toHaveProperty('btPeripheralId', TEST_RUUVI_PERIPHERAL.id)
+    expect(tags).toHaveProperty('btPeripheralName', TEST_RUUVI_PERIPHERAL.advertisement.localName)
   })
 
   it('Ruuvi measurement is only transformed once ("measurementSequence")', async () => {
@@ -104,9 +104,9 @@ describe('RuuviInfluxTransform', () => {
     const promise = new Promise<void>(r => pass.on('end', () => r()))
 
     const data: RuuviBluetoothData = {
-      data: MOCK_RUUVI_DF5,
+      data: TEST_RUUVI_DF5,
       timestamp: new Date(2022, 1, 28, 21),
-      peripheral: MOCK_RUUVI_PERIPHERAL
+      peripheral: TEST_RUUVI_PERIPHERAL
     }
 
     // Push the same data twice -> Same "measurementSequence"

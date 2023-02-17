@@ -118,6 +118,7 @@ export class InfluxWritable extends Writable {
 
   constructor(private readonly writeApi: WriteApi) {
     super()
+    this.log.debug('Initialized')
   }
 
   _write(chunk: Point[], _: BufferEncoding, callback: () => void): void {
