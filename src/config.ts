@@ -5,10 +5,6 @@ import { GatewayConfig } from './model'
 const CONFIG_PATH = process.env.CONFIG_PATH ?? 'config.json'
 
 export const readConfigFromFile = (): GatewayConfig => {
-  if (process.env.NODE_ENV === 'test') {
-    return {} as any // Disable in tests!
-  }
-
   if (!existsSync(CONFIG_PATH)) {
     throw new Error(`Config file not found: ${CONFIG_PATH}`)
   }
@@ -33,7 +29,10 @@ const GatewayConfigValidator: z.ZodType<Omit<GatewayConfig, 'host'>> = z.object(
     bucket: z.string(),
     org: z.string(),
     measurement: z.string().optional(),
-    defaultTags: z.record(z.string()).optional()
+    defaultTags: z.record(z.string()).optional(),
+    batchSize: z.number().optional(),
+    flushIntervalMs: z.number().optional(),
+    gzipThreshold: z.number().optional()
   }),
   cacheIntervalMs: z.number().optional()
 })

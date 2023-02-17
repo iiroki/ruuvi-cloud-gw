@@ -1,7 +1,7 @@
 {
   "name": "ruuvi-influxdb-gw",
   "version": "0.0.1",
-  "description": "Ruuvi-InfluxDB Gateway implemented with Node.js",
+  "description": "Ruuvi-InfluxDB Gateway implemented with TypeScript and Node.js",
   "author": "iiroki",
   "main": "src/index.ts",
   "scripts": {
