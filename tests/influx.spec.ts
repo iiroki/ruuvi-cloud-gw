@@ -11,6 +11,17 @@ describe('Influx Write API', () => {
     expect(writeUrl.searchParams.get('precision')).toBe('ms')
   })
 
+  it('Default tags are set properly', () => {
+    const { defaultTags } = createInfluxWriteApi({
+      ...TEST_INFLUX_CONFIG,
+      defaultTags: { foo: 'bar', baz: 'qux', fred: 'thud' }
+    })
+
+    expect(defaultTags).toHaveProperty('foo', 'bar')
+    expect(defaultTags).toHaveProperty('baz', 'qux')
+    expect(defaultTags).toHaveProperty('fred', 'thud')
+  })
+
   it('Host name is set as a default tag', () => {
     const { defaultTags } = createInfluxWriteApi(TEST_INFLUX_CONFIG)
     expect(defaultTags).toHaveProperty('host', os.hostname())
