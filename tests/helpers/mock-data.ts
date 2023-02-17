@@ -1,8 +1,9 @@
 import { randomUUID } from 'node:crypto'
 import { df5parser } from 'ojousima.ruuvi_endpoints.ts'
 import { BluetoothPeripheral } from '../../src/bluetooth'
+import { InfluxConfig } from '../../src/model'
 
-export const MOCK_RUUVI_DF5 = new Uint8Array([
+export const TEST_RUUVI_DF5 = new Uint8Array([
   5,
   19,
   20,
@@ -29,12 +30,12 @@ export const MOCK_RUUVI_DF5 = new Uint8Array([
   125
 ])
 
-export const MOCK_RUUVI_DF5_PARSED = df5parser(MOCK_RUUVI_DF5)
+export const TEST_RUUVI_DF5_PARSED = df5parser(TEST_RUUVI_DF5)
 
-const MOCK_RUUVI_PERIPHERAL_UUID = randomUUID()
-export const MOCK_RUUVI_PERIPHERAL: BluetoothPeripheral = {
-  id: MOCK_RUUVI_PERIPHERAL_UUID,
-  uuid: MOCK_RUUVI_PERIPHERAL_UUID,
+const TEST_RUUVI_PERIPHERAL_UUID = randomUUID()
+export const TEST_RUUVI_PERIPHERAL: BluetoothPeripheral = {
+  id: TEST_RUUVI_PERIPHERAL_UUID,
+  uuid: TEST_RUUVI_PERIPHERAL_UUID,
   address: '',
   addressType: 'unknown',
   advertisement: {
@@ -45,4 +46,11 @@ export const MOCK_RUUVI_PERIPHERAL: BluetoothPeripheral = {
     serviceUuids: []
   },
   state: 'disconnected'
+}
+
+export const TEST_INFLUX_CONFIG: InfluxConfig = {
+  url: 'http://localhost:8086',
+  token: 'test-token',
+  bucket: 'test-bucket',
+  org: 'test-org'
 }

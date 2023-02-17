@@ -6,8 +6,8 @@ export const createInfluxWriteApi = (influxConfig: InfluxConfig) => {
   const {
     url,
     token,
-    org,
     bucket,
+    org,
     defaultTags,
     batchSize,
     flushIntervalMs: flushInterval,

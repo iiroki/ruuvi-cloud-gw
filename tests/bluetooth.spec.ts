@@ -1,3 +1,5 @@
 describe.skip('BluetoothManager', () => {
-  // TODO
+  it('Dummy', () => {
+    // TODO
+  })
 })
