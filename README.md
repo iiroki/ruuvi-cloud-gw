@@ -2,9 +2,9 @@
 
 [![Unit Tests](https://github.com/iiroki/ruuvi-influxdb-gw/actions/workflows/unit-tests.yml/badge.svg?branch=main)](https://github.com/iiroki/ruuvi-influxdb-gw/actions/workflows/unit-tests.yml)
 
-_A big shoutout to [Ruuvi](https://ruuvi.com/) and their open-source practices for making this project possible!_
-
 **_Ruuvi-InfluxDB Gateway_** is a simple gateway to collect data from RuuviTags and send them to InfluxDB implemented with TypeScript and Node.js.
+
+![](./docs/ruuvi-influxdb-gw.drawio.png)
 
 **Features:**
 - Collect data from RuuviTags
@@ -107,3 +107,7 @@ This can be changed by setting the `CONFIG_PATH` env variable.
 ## License
 
 **MIT License** Copyright (c) 2023 Iiro Kiviluoma
+
+### Other Licenses
+
+[Ruuvi](https://ruuvi.com/) / Ojousima: BSD 3-Clause License
