@@ -14,7 +14,7 @@ export const readConfigFromFile = (): GatewayConfig => {
 }
 
 const GatewayConfigValidator: z.ZodType<Omit<GatewayConfig, 'host'>> = z.object({
-  bluetoothConfig: z.object({
+  bluetooth: z.object({
     serviceUuids: z.string().array().optional(),
     ruuviTags: z.array(
       z.object({
@@ -23,7 +23,7 @@ const GatewayConfigValidator: z.ZodType<Omit<GatewayConfig, 'host'>> = z.object(
       })
     ).optional()
   }).optional(),
-  influxConfig: z.object({
+  influx: z.object({
     url: z.string().url(),
     token: z.string(),
     bucket: z.string(),

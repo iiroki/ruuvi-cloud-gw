@@ -1,6 +1,6 @@
 import os from 'node:os'
 import { InfluxDB } from '@influxdata/influxdb-client'
-import { InfluxConfig } from './model'
+import { InfluxConfig, InfluxCustomTag } from './model'
 
 export const createInfluxWriteApi = (influxConfig: InfluxConfig) => {
   const {
@@ -18,7 +18,7 @@ export const createInfluxWriteApi = (influxConfig: InfluxConfig) => {
     url,
     token,
     writeOptions: {
-      defaultTags: { ...defaultTags, host: os.hostname() },
+      defaultTags: { ...defaultTags, [InfluxCustomTag.BtGatewayHost]: os.hostname() },
       batchSize,
       flushInterval,
       gzipThreshold

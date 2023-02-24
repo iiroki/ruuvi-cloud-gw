@@ -2,12 +2,12 @@ import { BluetoothManager } from './bluetooth'
 import { readConfigFromFile } from './config'
 import { createInfluxWriteApi } from './influx'
 import { getLogger } from './logger'
-import { InfluxWritable, IntervalCacheTransform, RuuviInfluxTransform } from './stream'
+import { InfluxWritable, RuuviInfluxTransform } from './stream'
 
 const log = getLogger('Index')
 const config = readConfigFromFile()
-const btManager = new BluetoothManager(config.bluetoothConfig)
-const influxWriteApi = createInfluxWriteApi(config.influxConfig)
+const btManager = new BluetoothManager(config.bluetooth)
+const influxWriteApi = createInfluxWriteApi(config.influx)
 let destoyed = false
 
 // Setup shutdown routine
@@ -24,8 +24,7 @@ process.on('SIGINT', async () => {
 
 // Setup data pipeline
 btManager.publisher
-  .pipe(new RuuviInfluxTransform(config.influxConfig.measurement))
-  .pipe(new IntervalCacheTransform(config.cacheIntervalMs))
+  .pipe(new RuuviInfluxTransform(config.influx.measurement))
   .pipe(new InfluxWritable(influxWriteApi))
 
 // Start the application

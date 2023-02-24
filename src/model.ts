@@ -1,7 +1,34 @@
+import noble from '@abandonware/noble'
 import { AccelerationBroadcast, BatteryBroadcast, RuuviTagBroadcast } from 'ojousima.ruuvi_endpoints.ts'
 
 export type RuuviBroadcast = RuuviTagBroadcast | AccelerationBroadcast | BatteryBroadcast
 export type RuuviParser = (data: Uint8Array) => RuuviBroadcast
+
+/**
+ * Bluetooth Peripheral info.
+ */
+export type BluetoothPeripheral = Pick<
+  noble.Peripheral,                                                     // eslint-disable-line
+  'id' | 'uuid' | 'address' | 'addressType' | 'advertisement' | 'state' // eslint-disable-line
+>
+
+/**
+ * RuuviTag Bluetooth advertisement data combined with Bluetooth Peripheral info and timestamp.
+ */
+export interface RuuviBluetoothData {
+  readonly data: Uint8Array
+  readonly timestamp: Date
+  readonly peripheral: BluetoothPeripheral
+}
+
+/**
+ * Custom InfluxDB tag set by the gateway.
+ */
+export enum InfluxCustomTag {
+  BtPeripheralId = 'btPeripheralId',
+  BtPeripheralName = 'btPeripheralName',
+  BtGatewayHost = 'btGatewayHost'
+}
 
 /**
  * RuuviTag Bluetooth advertisement filter.
@@ -40,7 +67,7 @@ export interface InfluxConfig {
  * Main configuration for the gateway.
  */
 export interface GatewayConfig {
-  readonly influxConfig: InfluxConfig
-  readonly bluetoothConfig?: BluetoothConfig
+  readonly influx: InfluxConfig
+  readonly bluetooth?: BluetoothConfig
   readonly cacheIntervalMs?: number
 }
