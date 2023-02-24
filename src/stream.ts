@@ -19,14 +19,13 @@ export class RuuviInfluxTransform extends Transform {
     const parser = getRuuviParser(data)
     if (parser) {
       const parsed = parser(data)
-      if (this.updateMeasurementSequence(parsed, peripheral)) {
+      if (!this.updateMeasurementSequence(parsed, peripheral)) {
         callback() // No need to process the same measurement again
         return
       }
 
       this.log.debug(parsed, 'Received RuuviTag data:')
-      const point = this.toInfluxPoint(parsed, peripheral, timestamp)
-      callback(null, point)
+      callback(null, this.toInfluxPoint(parsed, peripheral, timestamp))
     } else {
       this.log.error(`No RuuviParser for data: ${data}`)
       callback()
@@ -41,7 +40,7 @@ export class RuuviInfluxTransform extends Transform {
     point.tag(InfluxCustomTag.BtPeripheralId, peripheral.id)
     point.tag(InfluxCustomTag.BtPeripheralName, peripheral.advertisement.localName)
 
-    if (id) { // Do not insert 0 (zero)
+    if (id !== null) {
       point.tag('id', id.toString())
     }
 

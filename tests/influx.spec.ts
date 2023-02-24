@@ -1,6 +1,7 @@
 import os from 'node:os'
 import { TEST_INFLUX_CONFIG } from './helpers/mock-data'
 import { createInfluxWriteApi } from '../src/influx'
+import { InfluxCustomTag } from '../src/model'
 
 describe('Influx Write API', () => {
   it('Bucket, org and precision are set properly', () => {
@@ -23,7 +24,7 @@ describe('Influx Write API', () => {
 
   it('Host name is set as a default tag', () => {
     const { defaultTags } = createInfluxWriteApi(TEST_INFLUX_CONFIG)
-    expect(defaultTags).toHaveProperty('host', os.hostname())
+    expect(defaultTags).toHaveProperty(InfluxCustomTag.BtGatewayHost, os.hostname())
   })
 
   it('Time precision is set to "ms"', () => {
