@@ -1,7 +1,7 @@
 import { PassThrough, Readable } from 'node:stream'
 import { Point } from '@influxdata/influxdb-client'
 import { TEST_RUUVI_DF5, TEST_RUUVI_DF5_PARSED, TEST_RUUVI_PERIPHERAL } from './helpers/mock-data'
-import { RuuviBluetoothData } from '../src/model'
+import { RuuviBluetoothData } from '../src/bluetooth'
 import { createDefaultReadable, RuuviInfluxTransform } from '../src/stream'
 
 let publisher: Readable

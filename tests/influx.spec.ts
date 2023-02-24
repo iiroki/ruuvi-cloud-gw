@@ -1,7 +1,6 @@
 import os from 'node:os'
 import { TEST_INFLUX_CONFIG } from './helpers/mock-data'
-import { createInfluxWriteApi } from '../src/influx'
-import { InfluxCustomTag } from '../src/model'
+import { createInfluxWriteApi, InfluxCustomTag } from '../src/influx'
 
 describe('Influx Write API', () => {
   it('Bucket, org and precision are set properly', () => {

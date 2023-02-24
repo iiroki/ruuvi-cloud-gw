@@ -1,6 +1,15 @@
 import os from 'node:os'
 import { InfluxDB } from '@influxdata/influxdb-client'
-import { InfluxConfig, InfluxCustomTag } from './model'
+import { InfluxConfig } from './model'
+
+/**
+ * Custom InfluxDB tag set by the gateway.
+ */
+export enum InfluxCustomTag {
+  BtPeripheralId = 'btPeripheralId',
+  BtPeripheralName = 'btPeripheralName',
+  BtGatewayHost = 'btGatewayHost'
+}
 
 export const createInfluxWriteApi = (influxConfig: InfluxConfig) => {
   const {

@@ -1,8 +1,9 @@
 import { Readable, Transform, TransformCallback, Writable } from 'node:stream'
 import { Point, WriteApi } from '@influxdata/influxdb-client'
-import { formatBluetoothPeripheral } from './bluetooth'
+import { BluetoothPeripheral, formatBluetoothPeripheral, RuuviBluetoothData } from './bluetooth'
+import { InfluxCustomTag } from './influx'
 import { getLogger } from './logger'
-import { BluetoothPeripheral, InfluxCustomTag, RuuviBluetoothData, RuuviBroadcast } from './model'
+import { RuuviBroadcast } from './model'
 import { getRuuviParser } from './ruuvi'
 
 export class RuuviInfluxTransform extends Transform {
@@ -24,7 +25,7 @@ export class RuuviInfluxTransform extends Transform {
         return
       }
 
-      this.log.debug(parsed, 'Received RuuviTag data:')
+      this.log.debug(parsed, 'Received Ruuvi data:')
       callback(null, this.toInfluxPoint(parsed, peripheral, timestamp))
     } else {
       this.log.error(`No RuuviParser for data: ${data}`)
@@ -89,7 +90,7 @@ export class RuuviInfluxTransform extends Transform {
       const diff = measurementSequence - latest
       if (diff > 1) {
         this.log.warn(
-          `Missed measurements for RuuviTag '${formatBluetoothPeripheral(peripheral)}': ${diff - 1} measurements`
+          `Missed measurements for '${formatBluetoothPeripheral(peripheral)}': ${diff - 1} measurements`
         )
       }
     }
