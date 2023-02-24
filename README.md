@@ -82,27 +82,27 @@ This can be changed by setting the `CONFIG_PATH` env variable.
 **Configuration options:**
 | Config | Key | Description | Type | Required |
 | --- | --- | --- | --- | :---: |
-| `bluetoothConfig` | - | Bluetooth/Ruuvi configuration | See below | &cross; |
-| `bluetoothConfig` | `serviceUuids` | Bluetooth service UUIDs to scan for | `string[]` | &cross; |
-| `influxConfig` | - | InfluxDB configuration | See below | &check; |
-| `influxConfig` | `url` | Database URL | `string` | &check; |
-| `influxConfig` | `token` | API token | `string` | &check; |
-| `influxConfig` | `bucket` | Bucket | `string` | &check; |
-| `influxConfig` | `org` | Organization | `string` | &check; |
-| `influxConfig` | `measurement` | Measurement  | `string` | &check; |
-| `influxConfig` | `defaultTags` | Tags to be included with every data point  | `Record<string, string>` | &cross; |
-| `influxConfig` | `batchSize` | Max number of data points in a batch | `number` | &cross; |
-| `influxConfig` | `flushIntervalMs` | Interval between forceful data flushes (ms) | `number` | &cross; |
-| `influxConfig` | `gzipThreshold` | Batches larger than the value will be gzipped | `number` | &cross; |
+| `bluetooth` | - | Bluetooth/Ruuvi configuration | See below | &cross; |
+| `bluetooth` | `serviceUuids` | Bluetooth service UUIDs to scan for | `string[]` | &cross; |
+| `influx` | - | InfluxDB configuration | See below | &check; |
+| `influx` | `url` | Database URL | `string` | &check; |
+| `influx` | `token` | API token | `string` | &check; |
+| `influx` | `bucket` | Bucket | `string` | &check; |
+| `influx` | `org` | Organization | `string` | &check; |
+| `influx` | `measurement` | Measurement  | `string` | &check; |
+| `influx` | `defaultTags` | Tags to be included with every data point  | `Record<string, string>` | &cross; |
+| `influx` | `batchSize` | Max number of data points in a batch | `number` | &cross; |
+| `influx` | `flushIntervalMs` | Interval between forceful data flushes (ms) | `number` | &cross; |
+| `influx` | `gzipThreshold` | Batches larger than the value will be gzipped | `number` | &cross; |
 
 **Example config:**
 
 ```json
 {
-  "bluetoothConfig": {
+  "bluetooth": {
     "serviceUuids": ["fe9a"]
   },
-  "influxConfig": {
+  "influx": {
     "url": "http://localhost:8086",
     "token": "influx-token",
     "bucket": "influx-bucket",

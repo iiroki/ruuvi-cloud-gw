@@ -69,5 +69,4 @@ export interface InfluxConfig {
 export interface GatewayConfig {
   readonly influx: InfluxConfig
   readonly bluetooth?: BluetoothConfig
-  readonly cacheIntervalMs?: number
 }

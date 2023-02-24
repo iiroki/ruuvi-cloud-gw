@@ -33,6 +33,5 @@ const GatewayConfigValidator: z.ZodType<Omit<GatewayConfig, 'host'>> = z.object(
     batchSize: z.number().optional(),
     flushIntervalMs: z.number().optional(),
     gzipThreshold: z.number().optional()
-  }),
-  cacheIntervalMs: z.number().optional()
+  })
 })
