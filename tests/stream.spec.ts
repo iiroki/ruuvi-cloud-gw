@@ -1,10 +1,10 @@
+jest.mock('@abandonware/noble')
 import { PassThrough, Readable } from 'node:stream'
 import { Point } from '@influxdata/influxdb-client'
 import { TEST_RUUVI_DF5, TEST_RUUVI_DF5_PARSED, TEST_RUUVI_PERIPHERAL } from './helpers/mock-data'
 import { RuuviTagBluetoothData } from '../src/model'
 import { createDefaultReadable, RuuviInfluxTransform } from '../src/stream'
 
-jest.mock('@abandonware/noble')
 let publisher: Readable
 let pass: PassThrough
 
