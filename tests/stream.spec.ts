@@ -1,9 +1,10 @@
 import { PassThrough, Readable } from 'node:stream'
 import { Point } from '@influxdata/influxdb-client'
 import { TEST_RUUVI_DF5, TEST_RUUVI_DF5_PARSED, TEST_RUUVI_PERIPHERAL } from './helpers/mock-data'
-import { RuuviBluetoothData } from '../src/bluetooth'
+import { RuuviTagBluetoothData } from '../src/model'
 import { createDefaultReadable, RuuviInfluxTransform } from '../src/stream'
 
+jest.mock('@abandonware/noble')
 let publisher: Readable
 let pass: PassThrough
 
@@ -25,7 +26,7 @@ describe('RuuviInfluxTransform', () => {
       data: TEST_RUUVI_DF5,
       timestamp: new Date(2022, 1, 28, 21),
       peripheral: TEST_RUUVI_PERIPHERAL
-    } as RuuviBluetoothData)
+    } as RuuviTagBluetoothData)
 
     const { fields } = await promise
     const { id, mac, dataFormat, ...values } = TEST_RUUVI_DF5_PARSED
@@ -42,7 +43,7 @@ describe('RuuviInfluxTransform', () => {
       data: TEST_RUUVI_DF5,
       timestamp: new Date(2022, 1, 28, 21),
       peripheral: TEST_RUUVI_PERIPHERAL
-    } as RuuviBluetoothData)
+    } as RuuviTagBluetoothData)
 
     const { fields } = await promise
     expect(fields).not.toHaveProperty('id')
@@ -58,7 +59,7 @@ describe('RuuviInfluxTransform', () => {
       data: TEST_RUUVI_DF5,
       timestamp: new Date(2022, 1, 28, 21),
       peripheral: TEST_RUUVI_PERIPHERAL
-    } as RuuviBluetoothData)
+    } as RuuviTagBluetoothData)
 
     const transformed = await promise
     const tags = transformed['tags']
@@ -75,7 +76,7 @@ describe('RuuviInfluxTransform', () => {
       data: TEST_RUUVI_DF5,
       timestamp: new Date(2022, 1, 28, 21),
       peripheral: TEST_RUUVI_PERIPHERAL
-    } as RuuviBluetoothData)
+    } as RuuviTagBluetoothData)
 
     const transformed = await promise
     const tags = transformed['tags']
@@ -103,7 +104,7 @@ describe('RuuviInfluxTransform', () => {
     pass.on('data', data => transformed.push(data))
     const promise = new Promise<void>(r => pass.on('end', () => r()))
 
-    const data: RuuviBluetoothData = {
+    const data: RuuviTagBluetoothData = {
       data: TEST_RUUVI_DF5,
       timestamp: new Date(2022, 1, 28, 21),
       peripheral: TEST_RUUVI_PERIPHERAL

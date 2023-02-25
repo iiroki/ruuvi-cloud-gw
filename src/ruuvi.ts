@@ -1,8 +1,5 @@
-import { df3parser, df5parser, RuuviTagBroadcast } from 'ojousima.ruuvi_endpoints.ts'
-
-export type RuuviTagParser = (data: Uint8Array) => RuuviTagBroadcast
-export type RuuviTagFieldKey = keyof Omit<RuuviTagBroadcast, 'id' | 'mac' | 'dataFormat' | 'parsedAt'>
-export enum RuuviTagFieldType { Int, Float }
+import { df3parser, df5parser } from 'ojousima.ruuvi_endpoints.ts'
+import { RuuviTagFieldKey, RuuviTagFieldType, RuuviTagParser } from './model'
 
 // Ruuvi DF 3: https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-3-rawv1
 // Ruuvi DF 5: https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-5-rawv2

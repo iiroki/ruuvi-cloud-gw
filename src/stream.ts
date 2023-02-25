@@ -1,10 +1,11 @@
 import { Readable, Transform, TransformCallback, Writable } from 'node:stream'
 import { Point, WriteApi } from '@influxdata/influxdb-client'
 import { RuuviTagBroadcast } from 'ojousima.ruuvi_endpoints.ts'
-import { BluetoothPeripheral, formatBluetoothPeripheral, RuuviBluetoothData } from './bluetooth'
+import { formatBluetoothPeripheral } from './bluetooth'
 import { InfluxCustomTag } from './influx'
 import { getLogger } from './logger'
-import { getRuuviTagParser, RuuviTagFieldKey, RuuviTagFieldType, RUUVI_TAG_FIELD_TYPES } from './ruuvi'
+import { BluetoothPeripheral, RuuviTagBluetoothData, RuuviTagFieldKey, RuuviTagFieldType } from './model'
+import { getRuuviTagParser, RUUVI_TAG_FIELD_TYPES } from './ruuvi'
 
 export class RuuviInfluxTransform extends Transform {
   private readonly log = getLogger('RuuviInfluxTransform')
@@ -15,7 +16,7 @@ export class RuuviInfluxTransform extends Transform {
     this.log.debug('Initialized')
   }
 
-  _transform(chunk: RuuviBluetoothData, _: BufferEncoding, callback: TransformCallback): void {
+  _transform(chunk: RuuviTagBluetoothData, _: BufferEncoding, callback: TransformCallback): void {
     const { data, peripheral, timestamp } = chunk
     const parser = getRuuviTagParser(data)
     if (parser) {

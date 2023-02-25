@@ -1,6 +1,6 @@
 import os from 'node:os'
 import { InfluxDB } from '@influxdata/influxdb-client'
-import { InfluxConfig } from './config'
+import { InfluxConfig } from './model'
 
 /**
  * Custom InfluxDB tag set by the gateway.

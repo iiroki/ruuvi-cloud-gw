@@ -1,25 +1,8 @@
 import noble from '@abandonware/noble'
-import { BluetoothConfig } from './config'
 import { getLogger } from './logger'
+import { BluetoothConfig, BluetoothPeripheral, RuuviTagBluetoothData } from './model'
 import { extractRuuviData } from './ruuvi'
 import { createDefaultReadable } from './stream'
-
-/**
- * Bluetooth Peripheral info.
- */
-export type BluetoothPeripheral = Pick<
-  noble.Peripheral,                                                     // eslint-disable-line
-  'id' | 'uuid' | 'address' | 'addressType' | 'advertisement' | 'state' // eslint-disable-line
->
-
-/**
- * RuuviTag Bluetooth advertisement data combined with Bluetooth Peripheral info and timestamp.
- */
-export interface RuuviBluetoothData {
-  readonly data: Uint8Array
-  readonly timestamp: Date
-  readonly peripheral: BluetoothPeripheral
-}
 
 /**
  * `BluetoothManager` listens for RuuviTag advertisements and publishes
@@ -88,7 +71,7 @@ export class BluetoothManager {
     })
   }
 
-  private toRuuviBluetoothData(data: Uint8Array, timestamp: Date, peripheral: noble.Peripheral): RuuviBluetoothData {
+  private toRuuviBluetoothData(data: Uint8Array, timestamp: Date, peripheral: noble.Peripheral): RuuviTagBluetoothData {
     return { data, timestamp, peripheral: this.toBluetoothPeripheral(peripheral) }
   }
 
@@ -103,7 +86,7 @@ export class BluetoothManager {
     }
   }
 
-  private publish(data: RuuviBluetoothData) {
+  private publish(data: RuuviTagBluetoothData) {
     this._publisher.push(data)
   }
 }
