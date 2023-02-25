@@ -12,7 +12,7 @@
 - Send data to InfluxDB
 - Various configuration options (see [Configuration](#configuration))
 
-**Supported Ruuvi data formats:**
+**Supported RuuviTag data formats:**
 - [Data format 5](https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-5-rawv2)
 - [Data format 3](https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-3-rawv1)
 
@@ -54,7 +54,7 @@ The configuration is handled the same way as in development mode.
 
 3. (OPTIONAL) Check that the gateway is running:
     ```bash
-    pm2 list
+    pm2 ls
     ```
 
 ## Data flow
@@ -62,7 +62,8 @@ The configuration is handled the same way as in development mode.
 When the gateway receives data from RuuviTags, it transforms the data to InfluxDB data points using the following rules ([RuuviInfluxTransform](./src//stream.ts)):
 - **Tags:**
     - Default tags from the configuration
-    - `host`: Operating system host name
+    - `btGatewayHost`: Operating system host name
+    - `btGatewayHostPlatform`: Operating system platform
     - `btPeripheralId`: RuuviTag Bluetooth peripheral ID
     - `btPeripheralName`: RuuviTag Bluetooth peripheral local name
     - `id`: RuuviTag ID
@@ -75,9 +76,12 @@ When the gateway receives data from RuuviTags, it transforms the data to InfluxD
 ## Configuration
 
 By default, configuration is read from `config.json` in the root directory.
-This can be changed by setting the `CONFIG_PATH` env variable.
 
-**Configuration options:**
+**Env:**
+- `CONFIG_PATH`: Override default path to the configuration file.
+- `LOG_LEVEL`: [Pino log level](https://github.com/pinojs/pino/blob/master/docs/api.md#logger-level), default = `info`.
+
+**JSON Configuration options:**
 | Config | Key | Description | Type | Required |
 | --- | --- | --- | --- | :---: |
 | `bluetooth` | - | Bluetooth/Ruuvi configuration | See below | &cross; |
