@@ -21,9 +21,10 @@ describe('Influx Write API', () => {
     expect(defaultTags).toHaveProperty('fred', 'thud')
   })
 
-  it('Host name is set as a default tag', () => {
+  it('Host name and platform are set as default tags', () => {
     const { defaultTags } = createInfluxWriteApi(TEST_INFLUX_CONFIG)
     expect(defaultTags).toHaveProperty(InfluxCustomTag.BtGatewayHost, os.hostname())
+    expect(defaultTags).toHaveProperty(InfluxCustomTag.BtGatewayHostPlatform, os.platform())
   })
 
   it('Time precision is set to "ms"', () => {
