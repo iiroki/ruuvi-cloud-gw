@@ -1,6 +1,6 @@
 import noble from '@abandonware/noble'
+import { BluetoothConfig } from './config'
 import { getLogger } from './logger'
-import { BluetoothConfig } from './model'
 import { extractRuuviData } from './ruuvi'
 import { createDefaultReadable } from './stream'
 

@@ -1,5 +1,24 @@
-import { df3parser, df5parser, dfacparser, dfbaparser } from 'ojousima.ruuvi_endpoints.ts'
-import { RuuviParser } from './model'
+import { df3parser, df5parser, RuuviTagBroadcast } from 'ojousima.ruuvi_endpoints.ts'
+
+export type RuuviTagParser = (data: Uint8Array) => RuuviTagBroadcast
+export type RuuviTagFieldKey = keyof Omit<RuuviTagBroadcast, 'id' | 'mac' | 'dataFormat' | 'parsedAt'>
+export enum RuuviTagFieldType { Int, Float }
+
+// Ruuvi DF 3: https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-3-rawv1
+// Ruuvi DF 5: https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-5-rawv2
+export const RUUVI_TAG_FIELD_TYPES: Record<RuuviTagFieldKey, RuuviTagFieldType> = {
+  measurementSequence: RuuviTagFieldType.Int,
+  temperatureC: RuuviTagFieldType.Float,
+  pressurePa: RuuviTagFieldType.Int,
+  humidityRh: RuuviTagFieldType.Float,
+  batteryVoltageV: RuuviTagFieldType.Float,
+  accelerationXG: RuuviTagFieldType.Float,
+  accelerationYG: RuuviTagFieldType.Float,
+  accelerationZG: RuuviTagFieldType.Float,
+  movementCounter: RuuviTagFieldType.Int,
+  txPowerDBm: RuuviTagFieldType.Int,
+  rssiDB: RuuviTagFieldType.Int
+} as const
 
 /**
  * Returns `true` if `manufacturerId` is _"Ruuvi Innovations Ltd"_ (`0x0499`).
@@ -28,18 +47,12 @@ export const isRuuviDf3Data = (data: Uint8Array) => data[0] === 0x03
 export const isRuuviDf5Data = (data: Uint8Array) => data[0] === 0x05
 export const isRuuviDffeData = (data: Uint8Array) => data[0] === 0xfe
 
-export const getRuuviParser = (data: Uint8Array): RuuviParser => {
-  if (isRuuviAccelerationData(data)) {
-    return dfacparser
-  } else if (isRuuviBatteryData(data)) {
-    return dfbaparser
-  } else if (isRuuviDf3Data(data)) {
+export const getRuuviTagParser = (data: Uint8Array): RuuviTagParser | null => {
+  if (isRuuviDf3Data(data)) {
     return df3parser
   } else if (isRuuviDf5Data(data)) {
     return df5parser
-  } else if (isRuuviDffeData(data)) {
-    throw new Error('Ruuvi DFFE data format not supported!')
-  } else {
-    throw new Error(`Unsupported Ruuvi data format: ${data}`)
   }
+
+  return null
 }

@@ -2,7 +2,7 @@
 
 [![Unit Tests](https://github.com/iiroki/ruuvi-influxdb-gw/actions/workflows/unit-tests.yml/badge.svg?branch=main)](https://github.com/iiroki/ruuvi-influxdb-gw/actions/workflows/unit-tests.yml)
 
-**_Ruuvi-InfluxDB Gateway_** is a simple gateway to collect data from RuuviTags and send them to InfluxDB implemented with TypeScript and Node.js.
+**_Ruuvi-InfluxDB Gateway_** is a simple gateway implemented with TypeScript and Node.js that collects data from RuuviTags and send them to InfluxDB.
 
 ![](./docs/ruuvi-influxdb-gw.drawio.png)
 
@@ -15,8 +15,6 @@
 **Supported Ruuvi data formats:**
 - [Data format 5](https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-5-rawv2)
 - [Data format 3](https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-3-rawv1)
-- Acceleration
-- Battery
 
 ## Quickstart
 
@@ -114,8 +112,7 @@ This can be changed by setting the `CONFIG_PATH` env variable.
     "batchSize": 10,
     "flushIntervalMs": 1000,
     "gzipThreshold": 1024
-  },
-  "cacheIntervalMs": 5000
+  }
 }
 ```
 

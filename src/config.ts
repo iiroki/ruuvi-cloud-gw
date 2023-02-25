@@ -1,8 +1,48 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { z } from 'zod'
-import { GatewayConfig } from './model'
 
 const CONFIG_PATH = process.env.CONFIG_PATH ?? 'config.json'
+
+/**
+ * RuuviTag Bluetooth advertisement filter.
+ *
+ * If one of the properties matches, the advertisement should be accepted.
+ */
+export interface RuuviTagFilter {
+  readonly uuid?: string
+  readonly localName?: string
+}
+
+/**
+ * Bluetooth/Ruuvi configuration for the gateway.
+ */
+export interface BluetoothConfig {
+  readonly serviceUuids?: string[]
+  // readonly ruuviTags: RuuviTagFilter[]
+}
+
+/**
+ * InfluxDB configuration for the gateway.
+ */
+export interface InfluxConfig {
+  readonly url: string
+  readonly token: string
+  readonly bucket: string
+  readonly org: string
+  readonly measurement?: string
+  readonly defaultTags?: Record<string, string>
+  readonly batchSize?: number
+  readonly flushIntervalMs?: number
+  readonly gzipThreshold?: number
+}
+
+/**
+ * Main configuration for the gateway.
+ */
+export interface GatewayConfig {
+  readonly influx: InfluxConfig
+  readonly bluetooth?: BluetoothConfig
+}
 
 export const readConfigFromFile = (): GatewayConfig => {
   if (!existsSync(CONFIG_PATH)) {

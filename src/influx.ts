@@ -1,6 +1,6 @@
 import os from 'node:os'
 import { InfluxDB } from '@influxdata/influxdb-client'
-import { InfluxConfig } from './model'
+import { InfluxConfig } from './config'
 
 /**
  * Custom InfluxDB tag set by the gateway.
@@ -8,7 +8,8 @@ import { InfluxConfig } from './model'
 export enum InfluxCustomTag {
   BtPeripheralId = 'btPeripheralId',
   BtPeripheralName = 'btPeripheralName',
-  BtGatewayHost = 'btGatewayHost'
+  BtGatewayHost = 'btGatewayHost',
+  BtGatewayHostPlatform = 'btGatewayHostPlatform'
 }
 
 export const createInfluxWriteApi = (influxConfig: InfluxConfig) => {
@@ -27,7 +28,11 @@ export const createInfluxWriteApi = (influxConfig: InfluxConfig) => {
     url,
     token,
     writeOptions: {
-      defaultTags: { ...defaultTags, [InfluxCustomTag.BtGatewayHost]: os.hostname() },
+      defaultTags: {
+        ...defaultTags,
+        [InfluxCustomTag.BtGatewayHost]: os.hostname(),
+        [InfluxCustomTag.BtGatewayHostPlatform]: os.platform()
+      },
       batchSize,
       flushInterval,
       gzipThreshold

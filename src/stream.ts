@@ -1,10 +1,10 @@
 import { Readable, Transform, TransformCallback, Writable } from 'node:stream'
 import { Point, WriteApi } from '@influxdata/influxdb-client'
+import { RuuviTagBroadcast } from 'ojousima.ruuvi_endpoints.ts'
 import { BluetoothPeripheral, formatBluetoothPeripheral, RuuviBluetoothData } from './bluetooth'
 import { InfluxCustomTag } from './influx'
 import { getLogger } from './logger'
-import { RuuviBroadcast } from './model'
-import { getRuuviParser } from './ruuvi'
+import { getRuuviTagParser, RuuviTagFieldKey, RuuviTagFieldType, RUUVI_TAG_FIELD_TYPES } from './ruuvi'
 
 export class RuuviInfluxTransform extends Transform {
   private readonly log = getLogger('RuuviInfluxTransform')
@@ -17,7 +17,7 @@ export class RuuviInfluxTransform extends Transform {
 
   _transform(chunk: RuuviBluetoothData, _: BufferEncoding, callback: TransformCallback): void {
     const { data, peripheral, timestamp } = chunk
-    const parser = getRuuviParser(data)
+    const parser = getRuuviTagParser(data)
     if (parser) {
       const parsed = parser(data)
       if (!this.updateMeasurementSequence(parsed, peripheral)) {
@@ -25,15 +25,15 @@ export class RuuviInfluxTransform extends Transform {
         return
       }
 
-      this.log.debug(parsed, 'Received Ruuvi data:')
+      this.log.debug(parsed, 'Received RuuviTag data:')
       callback(null, this.toInfluxPoint(parsed, peripheral, timestamp))
     } else {
-      this.log.error(`No RuuviParser for data: ${data}`)
+      this.log.error(`No RuuviTagParser found for data: ${data}`)
       callback()
     }
   }
 
-  private toInfluxPoint(parsed: RuuviBroadcast, peripheral: BluetoothPeripheral, ts: Date): Point {
+  private toInfluxPoint(parsed: RuuviTagBroadcast, peripheral: BluetoothPeripheral, ts: Date): Point {
     const point = new Point(this.influxMeasurement).timestamp(ts)
     const { id, mac, dataFormat, ...fields } = parsed
 
@@ -56,11 +56,17 @@ export class RuuviInfluxTransform extends Transform {
     // InfluxDB fields (numeric Ruuvi values)
     Object.entries(fields).forEach(([key, value]) => {
       if (typeof value === 'number') {
-        // Key ends with "G" -> Acceleration -> Float
-        if (Number.isInteger(value) && !key.endsWith('G')) {
-          point.intField(key, value)
-        } else {
-          point.floatField(key, value)
+        const fieldType: RuuviTagFieldType | undefined = RUUVI_TAG_FIELD_TYPES[key as RuuviTagFieldKey]
+        switch (fieldType) {
+          case RuuviTagFieldType.Int:
+            point.intField(key, value)
+            break
+          case RuuviTagFieldType.Float:
+            point.floatField(key, value)
+            break
+          default:
+            this.log.warn(RuuviTagFieldType[fieldType], 'Unknown RuuviTag field type:')
+            break
         }
       }
     })
@@ -72,7 +78,7 @@ export class RuuviInfluxTransform extends Transform {
    * Updates a measurement sequence to cache if the measurement sequence does not already exist.
    * Returns `true` if the measurement sequence was updated.
    */
-  private updateMeasurementSequence(parsed: RuuviBroadcast, peripheral: BluetoothPeripheral): boolean {
+  private updateMeasurementSequence(parsed: RuuviTagBroadcast, peripheral: BluetoothPeripheral): boolean {
     const { measurementSequence } = parsed
     if (measurementSequence === null) {
       return false

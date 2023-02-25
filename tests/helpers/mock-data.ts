@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { df5parser } from 'ojousima.ruuvi_endpoints.ts'
-import { BluetoothPeripheral, InfluxConfig } from '../../src/model'
+import { BluetoothPeripheral } from '../../src/bluetooth'
+import { InfluxConfig } from '../../src/config'
 
 export const TEST_RUUVI_DF5 = new Uint8Array([
   5,
