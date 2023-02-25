@@ -1,9 +1,11 @@
 import { Readable, Transform, TransformCallback, Writable } from 'node:stream'
 import { Point, WriteApi } from '@influxdata/influxdb-client'
-import { RuuviBluetoothData } from './bluetooth'
+import { RuuviTagBroadcast } from 'ojousima.ruuvi_endpoints.ts'
+import { formatBluetoothPeripheral } from './bluetooth'
+import { InfluxCustomTag } from './influx'
 import { getLogger } from './logger'
-import { RuuviBroadcast } from './model'
-import { getRuuviParser } from './ruuvi'
+import { BluetoothPeripheral, RuuviTagBluetoothData, RuuviTagFieldKey, RuuviTagFieldType } from './model'
+import { getRuuviTagParser, RUUVI_TAG_FIELD_TYPES } from './ruuvi'
 
 export class RuuviInfluxTransform extends Transform {
   private readonly log = getLogger('RuuviInfluxTransform')
@@ -14,102 +16,93 @@ export class RuuviInfluxTransform extends Transform {
     this.log.debug('Initialized')
   }
 
-  _transform(chunk: RuuviBluetoothData, _: BufferEncoding, callback: TransformCallback): void {
+  _transform(chunk: RuuviTagBluetoothData, _: BufferEncoding, callback: TransformCallback): void {
     const { data, peripheral, timestamp } = chunk
-    const parser = getRuuviParser(data)
+    const parser = getRuuviTagParser(data)
     if (parser) {
       const parsed = parser(data)
-      if (this.ruuviMeasurementExists(parsed, peripheral.id)) {
+      if (!this.updateMeasurementSequence(parsed, peripheral)) {
         callback() // No need to process the same measurement again
         return
       }
 
-      // TODO: Check missed Ruuvi measurements?
-
-      const { id, mac, dataFormat, ...fields } = parsed
-      const point = new Point(this.influxMeasurement).timestamp(timestamp)
-
-      // InfluxDB tags (Bluetooth + Ruuvi metadata)
-      point.tag('btPeripheralId', peripheral.id)
-      point.tag('btPeripheralName', peripheral.advertisement.localName)
-
-      if (id !== null) {
-        point.tag('id', id.toString())
-      }
-
-      if (mac !== null) {
-        point.tag('mac', mac.toString())
-      }
-
-      if (dataFormat !== null) {
-        point.tag('dataFormat', dataFormat.toString())
-      }
-
-      // InfluxDB fields (numeric Ruuvi values)
-      Object.entries(fields).forEach(([key, value]) => {
-        if (typeof value === 'number') {
-          if (Number.isInteger(value)) {
-            point.intField(key, value)
-          } else {
-            point.floatField(key, value)
-          }
-        }
-      })
-
-      callback(null, point)
+      this.log.debug(parsed, 'Received RuuviTag data:')
+      callback(null, this.toInfluxPoint(parsed, peripheral, timestamp))
     } else {
-      this.log.error(`No RuuviParser for format: ${data}`)
+      this.log.error(`No RuuviTagParser found for data: ${data}`)
       callback()
     }
   }
 
-  private ruuviMeasurementExists(parsed: RuuviBroadcast, peripheralId: string) {
+  private toInfluxPoint(parsed: RuuviTagBroadcast, peripheral: BluetoothPeripheral, ts: Date): Point {
+    const point = new Point(this.influxMeasurement).timestamp(ts)
+    const { id, mac, dataFormat, ...fields } = parsed
+
+    // InfluxDB tags (Bluetooth + Ruuvi metadata)
+    point.tag(InfluxCustomTag.BtPeripheralId, peripheral.id)
+    point.tag(InfluxCustomTag.BtPeripheralName, peripheral.advertisement.localName)
+
+    if (id !== null) {
+      point.tag('id', id.toString())
+    }
+
+    if (mac !== null) {
+      point.tag('mac', mac.toString())
+    }
+
+    if (dataFormat !== null) {
+      point.tag('dataFormat', dataFormat.toString())
+    }
+
+    // InfluxDB fields (numeric Ruuvi values)
+    Object.entries(fields).forEach(([key, value]) => {
+      if (typeof value === 'number') {
+        const fieldType: RuuviTagFieldType | undefined = RUUVI_TAG_FIELD_TYPES[key as RuuviTagFieldKey]
+        switch (fieldType) {
+          case RuuviTagFieldType.Int:
+            point.intField(key, value)
+            break
+          case RuuviTagFieldType.Float:
+            point.floatField(key, value)
+            break
+          default:
+            this.log.warn(RuuviTagFieldType[fieldType], 'Unknown RuuviTag field type:')
+            break
+        }
+      }
+    })
+
+    return point
+  }
+
+  /**
+   * Updates a measurement sequence to cache if the measurement sequence does not already exist.
+   * Returns `true` if the measurement sequence was updated.
+   */
+  private updateMeasurementSequence(parsed: RuuviTagBroadcast, peripheral: BluetoothPeripheral): boolean {
     const { measurementSequence } = parsed
-    if (!measurementSequence) {
+    if (measurementSequence === null) {
       return false
     }
 
-    const current = this.measurementSequences.get(peripheralId)
-    return current && current >= measurementSequence
-  }
-}
-
-export class IntervalCacheTransform extends Transform {
-  private readonly log = getLogger('IntervalCache')
-  private readonly cache: any[] = []
-  private readonly interval: NodeJS.Timer
-
-  constructor(intervalMs?: number) {
-    super({ readableObjectMode: true, writableObjectMode: true })
-    const ms = intervalMs ?? 5000 // Default
-    this.interval = setInterval(() => this.pushCache(), ms)
-    this.log.debug(`Initialized with interval: ${ms} ms`)
-  }
-
-  _transform(chunk: any, _: BufferEncoding, callback: TransformCallback): void {
-    if (Array.isArray(chunk)) {
-      this.cache.push(...chunk)
-    } else {
-      this.cache.push(chunk)
+    // Update measurement sequence if it doesn't exist or a newer was received
+    const latest = this.measurementSequences.get(peripheral.id)
+    const shouldUpdate = latest === undefined || measurementSequence !== latest
+    if (shouldUpdate) {
+      this.measurementSequences.set(peripheral.id, measurementSequence)
     }
 
-    callback()
-  }
-
-  _flush(callback: TransformCallback): void {
-    this.log.info('Flushing...')
-    clearInterval(this.interval)
-    this.pushCache()
-    callback()
-  }
-
-  private pushCache() {
-    if (this.cache.length !== 0) {
-      this.log.info(`Pushing cache: ${this.cache.length} items`)
-      const chunk = [...this.cache]
-      this.cache.length = 0
-      this.push(chunk)
+    if (latest !== undefined) {
+      // This does not work if "measurementSequence" wraps around, but that's a price we're willing to pay :)
+      const diff = measurementSequence - latest
+      if (diff > 1) {
+        this.log.warn(
+          `Missed measurements for '${formatBluetoothPeripheral(peripheral)}': ${diff - 1} measurements`
+        )
+      }
     }
+
+    return shouldUpdate
   }
 }
 
@@ -117,13 +110,19 @@ export class InfluxWritable extends Writable {
   private readonly log = getLogger('InfluxWritable')
 
   constructor(private readonly writeApi: WriteApi) {
-    super()
+    super({ objectMode: true })
     this.log.debug('Initialized')
   }
 
-  _write(chunk: Point[], _: BufferEncoding, callback: () => void): void {
-    this.log.debug(`Writing to InfluxDB: ${chunk.length} points`)
-    this.writeApi.writePoints(chunk)
+  _write(chunk: Point | Point[], _: BufferEncoding, callback: () => void): void {
+    const isArray = Array.isArray(chunk)
+    this.log.info(`Writing to InfluxDB: ${isArray ? chunk.length : 1} data point(s)`)
+    if (isArray) {
+      this.writeApi.writePoints(chunk)
+    } else {
+      this.writeApi.writePoint(chunk)
+    }
+
     callback()
   }
 }

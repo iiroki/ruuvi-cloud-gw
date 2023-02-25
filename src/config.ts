@@ -5,10 +5,6 @@ import { GatewayConfig } from './model'
 const CONFIG_PATH = process.env.CONFIG_PATH ?? 'config.json'
 
 export const readConfigFromFile = (): GatewayConfig => {
-  if (process.env.NODE_ENV === 'test') {
-    return {} as any // Disable in tests!
-  }
-
   if (!existsSync(CONFIG_PATH)) {
     throw new Error(`Config file not found: ${CONFIG_PATH}`)
   }
@@ -18,7 +14,7 @@ export const readConfigFromFile = (): GatewayConfig => {
 }
 
 const GatewayConfigValidator: z.ZodType<Omit<GatewayConfig, 'host'>> = z.object({
-  bluetoothConfig: z.object({
+  bluetooth: z.object({
     serviceUuids: z.string().array().optional(),
     ruuviTags: z.array(
       z.object({
@@ -27,13 +23,15 @@ const GatewayConfigValidator: z.ZodType<Omit<GatewayConfig, 'host'>> = z.object(
       })
     ).optional()
   }).optional(),
-  influxConfig: z.object({
+  influx: z.object({
     url: z.string().url(),
     token: z.string(),
     bucket: z.string(),
     org: z.string(),
     measurement: z.string().optional(),
-    defaultTags: z.record(z.string()).optional()
-  }),
-  cacheIntervalMs: z.number().optional()
+    defaultTags: z.record(z.string()).optional(),
+    batchSize: z.number().optional(),
+    flushIntervalMs: z.number().optional(),
+    gzipThreshold: z.number().optional()
+  })
 })

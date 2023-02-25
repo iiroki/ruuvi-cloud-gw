@@ -1,19 +1,8 @@
 import noble from '@abandonware/noble'
 import { getLogger } from './logger'
-import { BluetoothConfig } from './model'
+import { BluetoothConfig, BluetoothPeripheral, RuuviTagBluetoothData } from './model'
 import { extractRuuviData } from './ruuvi'
 import { createDefaultReadable } from './stream'
-
-export type BluetoothPeripheral = Pick<
-  noble.Peripheral,                                                     // eslint-disable-line
-  'id' | 'uuid' | 'address' | 'addressType' | 'advertisement' | 'state' // eslint-disable-line
->
-
-export interface RuuviBluetoothData {
-  readonly data: Uint8Array
-  readonly timestamp: Date
-  readonly peripheral: BluetoothPeripheral
-}
 
 /**
  * `BluetoothManager` listens for RuuviTag advertisements and publishes
@@ -25,6 +14,7 @@ export interface RuuviBluetoothData {
  */
 export class BluetoothManager {
   private readonly log = getLogger('BluetoothManager')
+  private readonly ruuviPeripherals = new Set<string>()
   private readonly _publisher = createDefaultReadable()
 
   constructor(private readonly config: BluetoothConfig = {}) {
@@ -46,6 +36,11 @@ export class BluetoothManager {
       const ruuviData = extractRuuviData(manufacturerData)
       if (ruuviData) {
         const ruuviTimestamp = new Date()
+        if (!this.ruuviPeripherals.has(peripheral.id)) {
+          this.ruuviPeripherals.add(peripheral.id)
+          this.log.info(`Discovered RuuviTag: ${formatBluetoothPeripheral(peripheral)}`)
+        }
+
         this.publish(this.toRuuviBluetoothData(ruuviData, ruuviTimestamp, peripheral))
       }
     })
@@ -76,7 +71,7 @@ export class BluetoothManager {
     })
   }
 
-  private toRuuviBluetoothData(data: Uint8Array, timestamp: Date, peripheral: noble.Peripheral): RuuviBluetoothData {
+  private toRuuviBluetoothData(data: Uint8Array, timestamp: Date, peripheral: noble.Peripheral): RuuviTagBluetoothData {
     return { data, timestamp, peripheral: this.toBluetoothPeripheral(peripheral) }
   }
 
@@ -91,11 +86,11 @@ export class BluetoothManager {
     }
   }
 
-  private publish(data: RuuviBluetoothData) {
+  private publish(data: RuuviTagBluetoothData) {
     this._publisher.push(data)
   }
-
-  private formatPeripheral(peripheral: noble.Peripheral): string {
-    return `${peripheral.advertisement.localName} (${peripheral.id})`
-  }
 }
+
+export const formatBluetoothPeripheral = (peripheral: BluetoothPeripheral): string => (
+  `${peripheral.advertisement.localName} (${peripheral.id})`
+)

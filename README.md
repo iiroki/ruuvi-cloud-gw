@@ -2,7 +2,7 @@
 
 [![Unit Tests](https://github.com/iiroki/ruuvi-influxdb-gw/actions/workflows/unit-tests.yml/badge.svg?branch=main)](https://github.com/iiroki/ruuvi-influxdb-gw/actions/workflows/unit-tests.yml)
 
-**_Ruuvi-InfluxDB Gateway_** is a simple gateway to collect data from RuuviTags and send them to InfluxDB implemented with TypeScript and Node.js.
+**_Ruuvi-InfluxDB Gateway_** is a simple gateway implemented with TypeScript and Node.js that collects data from RuuviTags and send them to InfluxDB.
 
 ![](./docs/ruuvi-influxdb-gw.drawio.png)
 
@@ -12,11 +12,9 @@
 - Send data to InfluxDB
 - Various configuration options (see [Configuration](#configuration))
 
-**Supported Ruuvi data formats:**
+**Supported RuuviTag data formats:**
 - [Data format 5](https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-5-rawv2)
 - [Data format 3](https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-3-rawv1)
-- Acceleration
-- Battery
 
 ## Quickstart
 
@@ -56,7 +54,7 @@ The configuration is handled the same way as in development mode.
 
 3. (OPTIONAL) Check that the gateway is running:
     ```bash
-    pm2 list
+    pm2 ls
     ```
 
 ## Data flow
@@ -64,7 +62,8 @@ The configuration is handled the same way as in development mode.
 When the gateway receives data from RuuviTags, it transforms the data to InfluxDB data points using the following rules ([RuuviInfluxTransform](./src//stream.ts)):
 - **Tags:**
     - Default tags from the configuration
-    - `host`: Operating system host name
+    - `btGatewayHost`: Operating system host name
+    - `btGatewayHostPlatform`: Operating system platform
     - `btPeripheralId`: RuuviTag Bluetooth peripheral ID
     - `btPeripheralName`: RuuviTag Bluetooth peripheral local name
     - `id`: RuuviTag ID
@@ -77,32 +76,35 @@ When the gateway receives data from RuuviTags, it transforms the data to InfluxD
 ## Configuration
 
 By default, configuration is read from `config.json` in the root directory.
-This can be changed by setting the `CONFIG_PATH` env variable.
 
-**Configuration options:**
+**Env:**
+- `CONFIG_PATH`: Override default path to the configuration file.
+- `LOG_LEVEL`: [Pino log level](https://github.com/pinojs/pino/blob/master/docs/api.md#logger-level), default = `info`.
+
+**JSON Configuration options:**
 | Config | Key | Description | Type | Required |
 | --- | --- | --- | --- | :---: |
-| `bluetoothConfig` | - | Bluetooth/Ruuvi configuration | See below | &cross; |
-| `bluetoothConfig` | `serviceUuids` | Bluetooth service UUIDs to scan for | `string[]` | &cross; |
-| `influxConfig` | - | InfluxDB configuration | See below | &check; |
-| `influxConfig` | `url` | Database URL | `string` | &check; |
-| `influxConfig` | `token` | API token | `string` | &check; |
-| `influxConfig` | `bucket` | Bucket | `string` | &check; |
-| `influxConfig` | `org` | Organization | `string` | &check; |
-| `influxConfig` | `measurement` | Measurement  | `string` | &check; |
-| `influxConfig` | `defaultTags` | Tags to be included with every data point  | `Record<string, string>` | &cross; |
-| `influxConfig` | `batchSize` | Max number of data points in a batch | `number` | &cross; |
-| `influxConfig` | `flushIntervalMs` | Interval between forceful data flushes (ms) | `number` | &cross; |
-| `influxConfig` | `gzipThreshold` | Batches larger than the value will be gzipped | `number` | &cross; |
+| `bluetooth` | - | Bluetooth/Ruuvi configuration | See below | &cross; |
+| `bluetooth` | `serviceUuids` | Bluetooth service UUIDs to scan for | `string[]` | &cross; |
+| `influx` | - | InfluxDB configuration | See below | &check; |
+| `influx` | `url` | Database URL | `string` | &check; |
+| `influx` | `token` | API token | `string` | &check; |
+| `influx` | `bucket` | Bucket | `string` | &check; |
+| `influx` | `org` | Organization | `string` | &check; |
+| `influx` | `measurement` | Measurement  | `string` | &check; |
+| `influx` | `defaultTags` | Tags to be included with every data point  | `Record<string, string>` | &cross; |
+| `influx` | `batchSize` | Max number of data points in a batch | `number` | &cross; |
+| `influx` | `flushIntervalMs` | Interval between forceful data flushes (ms) | `number` | &cross; |
+| `influx` | `gzipThreshold` | Batches larger than the value will be gzipped | `number` | &cross; |
 
 **Example config:**
 
 ```json
 {
-  "bluetoothConfig": {
+  "bluetooth": {
     "serviceUuids": ["fe9a"]
   },
-  "influxConfig": {
+  "influx": {
     "url": "http://localhost:8086",
     "token": "influx-token",
     "bucket": "influx-bucket",
@@ -114,8 +116,7 @@ This can be changed by setting the `CONFIG_PATH` env variable.
     "batchSize": 10,
     "flushIntervalMs": 1000,
     "gzipThreshold": 1024
-  },
-  "cacheIntervalMs": 5000
+  }
 }
 ```
 
