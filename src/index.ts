@@ -1,32 +1,34 @@
-import { BluetoothManager } from './bluetooth'
 import { readConfigFromFile } from './config'
-import { createInfluxWriteApi } from './influx'
 import { getLogger } from './logger'
-import { InfluxWritable, RuuviInfluxTransform } from './stream'
+import { createOutputStream } from './output'
+import { RuuviTagListener } from './ruuvi/bluetooth'
 
-const log = getLogger('Index')
+const log = getLogger('RuuviCloudGw')
 const config = readConfigFromFile()
-const btManager = new BluetoothManager(config.bluetooth)
-const influxWriteApi = createInfluxWriteApi(config.influx)
+if (!config.outputs && !config.ruuvi?.scanMode) {
+  log.warn('No outputs defined while scan mode is disabled')
+  process.exit(0)
+}
+
+const btManager = new RuuviTagListener(config.ruuvi)
 let destoyed = false
 
-// Setup shutdown routine
 process.on('SIGINT', async () => {
   if (!destoyed) {
     destoyed = true
-    log.debug('Performing shutdown routine...')
+    log.debug('Performing shutdown routine')
     await btManager.destroy()
-    await influxWriteApi.close()
-    log.info('Ready for shutdown.')
+    // await influxWriteApi.close()
+    log.info('Ready for shutdown')
     process.exit(0)
   }
 })
 
-// Setup data pipeline
-btManager.publisher
-  .pipe(new RuuviInfluxTransform(config.influx.measurement))
-  .pipe(new InfluxWritable(influxWriteApi))
+if (config.outputs) {
+  log.info(`Initializing outputs: ${Object.entries(config.outputs)}`)
+  const output = createOutputStream(config.outputs)
+  btManager.publisher.pipe(output)
+}
 
-// Start the application
-log.info('Ready to start.')
+log.info('Starting')
 btManager.start()

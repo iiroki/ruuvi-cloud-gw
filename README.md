@@ -1,15 +1,18 @@
-# Ruuvi-InfluxDB Gateway
+# Ruuvi Cloud Gateway
 
-[![Unit Tests](https://github.com/iiroki/ruuvi-influxdb-gw/actions/workflows/unit-tests.yml/badge.svg?branch=main)](https://github.com/iiroki/ruuvi-influxdb-gw/actions/workflows/unit-tests.yml)
+[![Unit Tests](https://github.com/iiroki/ruuvi-influxdb-gw/actions/workflows/unit-tests.yml/badge.svg?branch=main)](https://github.com/iiroki/ruuvi-cloud-gw/actions/workflows/unit-tests.yml)
 
-**_Ruuvi-InfluxDB Gateway_** is a simple gateway implemented with TypeScript and Node.js that collects data from RuuviTags and send them to InfluxDB.
+**_Ruuvi Cloud Gateway_** is a simple gateway implemented with TypeScript and Node.js that
+collects data from RuuviTags and send them to various cloud outputs.
 
-![](./docs/ruuvi-influxdb-gw.drawio.png)
+![](./docs/ruuvi-cloud-gw.drawio.png)
 
 **Features:**
 - Collect data from RuuviTags
 - Transform Ruuvi data to InfluxDB-compatible format
-- Send data to InfluxDB
+- Send data to cloud:
+    - [Time Series Platform](https://github.com/iiroki/time-series-platform) (my personal time series storage)
+    - [InfluxDB](https://www.influxdata.com/)
 - Various configuration options (see [Configuration](#configuration))
 
 **Supported RuuviTag data formats:**
@@ -17,6 +20,8 @@
 - [Data format 3](https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-3-rawv1)
 
 ## Quickstart
+
+TODO: Production with Docker
 
 **Prerequisites:**
 - [Node.js](https://nodejs.org/en/)
@@ -119,11 +124,3 @@ By default, configuration is read from `config.json` in the root directory.
   }
 }
 ```
-
-## License
-
-**MIT License** Copyright (c) 2023 Iiro Kiviluoma
-
-### Other Licenses
-
-[Ruuvi](https://ruuvi.com/) / Ojousima: BSD 3-Clause License

@@ -1,11 +1,51 @@
-import { Readable, Transform, TransformCallback, Writable } from 'node:stream'
-import { Point, WriteApi } from '@influxdata/influxdb-client'
+import { hostname, platform } from 'os'
+import { Transform, TransformCallback, Writable } from 'stream'
+import { InfluxDB, Point, WriteApi } from '@influxdata/influxdb-client'
 import { RuuviTagBroadcast } from 'ojousima.ruuvi_endpoints.ts'
-import { formatBluetoothPeripheral } from './bluetooth'
-import { InfluxCustomTag } from './influx'
-import { getLogger } from './logger'
-import { BluetoothPeripheral, RuuviTagBluetoothData, RuuviTagFieldKey, RuuviTagFieldType } from './model'
-import { getRuuviTagParser, RUUVI_TAG_FIELD_TYPES } from './ruuvi'
+import { getLogger } from '../logger'
+import { BluetoothPeripheral, InfluxConfig, RuuviTagBluetoothData, RuuviTagFieldKey, RuuviTagFieldType } from '../model'
+import { formatBluetoothPeripheral } from '../ruuvi/bluetooth'
+import { RUUVI_TAG_FIELD_TYPES, getRuuviTagParser } from '../ruuvi/data'
+
+/**
+ * Custom InfluxDB tag set by the gateway.
+ */
+export enum InfluxCustomTag {
+  BtPeripheralId = 'btPeripheralId',
+  BtPeripheralName = 'btPeripheralName',
+  BtGatewayHost = 'btGatewayHost',
+  BtGatewayHostPlatform = 'btGatewayHostPlatform'
+}
+
+export const createInfluxWriteApi = (influxConfig: InfluxConfig) => {
+  const {
+    url,
+    token,
+    bucket,
+    org,
+    defaultTags,
+    batchSize,
+    flushIntervalMs: flushInterval,
+    gzipThreshold
+  } = influxConfig
+
+  const client = new InfluxDB({
+    url,
+    token,
+    writeOptions: {
+      defaultTags: {
+        ...defaultTags,
+        [InfluxCustomTag.BtGatewayHost]: hostname(),
+        [InfluxCustomTag.BtGatewayHostPlatform]: platform()
+      },
+      batchSize,
+      flushInterval,
+      gzipThreshold
+    }
+  })
+
+  return client.getWriteApi(org, bucket, 'ms') // Millisecond precision!
+}
 
 export class RuuviInfluxTransform extends Transform {
   private readonly log = getLogger('RuuviInfluxTransform')
@@ -126,8 +166,3 @@ export class InfluxWritable extends Writable {
     callback()
   }
 }
-
-export const createDefaultReadable = () => new Readable({
-  objectMode: true,
-  read: () => {/* NOP */}
-})
