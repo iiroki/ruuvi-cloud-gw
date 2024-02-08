@@ -15,13 +15,33 @@ import { RuuviConfig, BluetoothPeripheral, RuuviTagBluetoothData } from '../mode
 export class RuuviTagListener {
   private readonly log = getLogger('RuuviTagListener')
   private readonly ruuviPeripherals = new Map<string, noble.Peripheral>()
+  private readonly ignoredRuuviPeripherals = new Set<string>()
+  private readonly ruuviIdFilter?: Set<string>
+  private readonly ruuviNameFilter?: Set<string>
   public readonly publisher: Readable
 
   constructor(private readonly config: RuuviConfig = {}) {
     noble.on('scanStart', () => this.log.info('Starting Bluetooth scanning'))
     noble.on('scanStop', () => this.log.info('Stopped Bluetooth scanning'))
 
-    // TODO: RuuviTag filter
+    for (const f of (this.config.filters ?? [])) {
+      switch (f.type) {
+        case 'id':
+          if (!this.ruuviIdFilter) {
+            this.ruuviIdFilter = new Set()
+          }
+
+          this.ruuviIdFilter.add(f.value)
+          break
+        case 'name':
+          if (!this.ruuviNameFilter) {
+            this.ruuviNameFilter = new Set()
+          }
+
+          this.ruuviNameFilter.add(f.value)
+          break
+      }
+    }
 
     this.publisher = new Readable({
       objectMode: true,
@@ -45,9 +65,19 @@ export class RuuviTagListener {
       const { manufacturerData } = peripheral.advertisement
       const ruuviData = extractRuuviData(manufacturerData)
       if (ruuviData) {
+        if (this.ignoredRuuviPeripherals.has(peripheral.id)) {
+          return // Has already been ignored
+        }
+
         const ruuviTimestamp = new Date()
         const knownPeripheral = this.ruuviPeripherals.get(peripheral.id)
         if (!knownPeripheral) {
+          if (!this.isIncluded(peripheral)) {
+            this.ignoredRuuviPeripherals.add(peripheral.id)
+            this.log.info(`Ignored RuuviTag: ${formatBluetoothPeripheral(peripheral)}`)
+            return
+          }
+
           this.ruuviPeripherals.set(peripheral.id, peripheral)
           this.log.info(`Discovered RuuviTag: ${formatBluetoothPeripheral(peripheral)}`)
         } else if (!knownPeripheral.advertisement.localName && peripheral.advertisement.localName) {
@@ -70,9 +100,21 @@ export class RuuviTagListener {
     this.log.debug('Destroyed')
   }
 
-  private startScan() {
+  private isIncluded(peripheral: noble.Peripheral): boolean {
+    if (this.ruuviIdFilter) {
+      return this.ruuviIdFilter?.has(peripheral.id)
+    }
+
+    if (this.ruuviNameFilter) {
+      return this.ruuviNameFilter.has(peripheral.advertisement.localName)
+    }
+
+    return true // No filters
+  }
+
+  private startScan(): Promise<void> {
     const { serviceUuids } = this.config
-    return new Promise<void>(async res => {
+    return new Promise(async res => {
       if (noble.state === 'poweredOn') {
         await noble.startScanningAsync(serviceUuids, true)
         res()

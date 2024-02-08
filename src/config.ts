@@ -16,7 +16,7 @@ export const readConfigFromFile = (): RuuviCloudGatewayConfig => {
 }
 
 const zRuuviTagIdentifier: z.ZodType<RuuviTagIdentifier> = z.object({
-  type: z.union([z.literal('uuid'), z.literal('name')]),
+  type: z.union([z.literal('id'), z.literal('name')]),
   value: z.string()
 })
 

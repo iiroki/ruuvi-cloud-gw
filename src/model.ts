@@ -5,7 +5,7 @@ export type RuuviTagParser = (data: Uint8Array) => RuuviTagBroadcast
 export type RuuviTagFieldKey = keyof Omit<RuuviTagBroadcast, 'id' | 'mac' | 'dataFormat' | 'parsedAt'>
 export enum RuuviTagFieldType { Int, Float }
 
-export type RuuviTagIdentifierType = 'uuid' | 'name'
+export type RuuviTagIdentifierType = 'id' | 'name'
 
 /**
  * Bluetooth Peripheral info.
