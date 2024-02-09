@@ -1,7 +1,7 @@
 {
-  "name": "ruuvi-influxdb-gw",
+  "name": "ruuvi-cloud-gw",
   "version": "0.0.1",
-  "description": "Ruuvi-InfluxDB Gateway implemented with TypeScript and Node.js",
+  "description": "Ruuvi Cloud Gateway implemented with TypeScript and Node.js",
   "author": "iiroki",
   "main": "src/index.ts",
   "engines": {
@@ -17,6 +17,7 @@
     "lint": "eslint --ext .ts src"
   },
   "dependencies": {
+    "@abandonware/bluetooth-hci-socket": "^0.5.3-10",
     "@abandonware/noble": "^1.9.2-24",
     "@influxdata/influxdb-client": "^1.33.1",
     "ojousima.ruuvi_endpoints.ts": "^4.0.0",
