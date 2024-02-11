@@ -5,6 +5,8 @@ export type RuuviTagParser = (data: Uint8Array) => RuuviTagBroadcast
 export type RuuviTagFieldKey = keyof Omit<RuuviTagBroadcast, 'id' | 'mac' | 'dataFormat' | 'parsedAt'>
 export enum RuuviTagFieldType { Int, Float }
 
+export type RuuviTagIdentifierType = 'id' | 'name'
+
 /**
  * Bluetooth Peripheral info.
  */
@@ -16,10 +18,14 @@ export type BluetoothPeripheral = Pick<
 /**
  * RuuviTag Bluetooth advertisement data combined with Bluetooth Peripheral info and timestamp.
  */
-export interface RuuviTagBluetoothData {
+export type RuuviTagBluetoothData = {
   readonly data: Uint8Array
   readonly timestamp: Date
   readonly peripheral: BluetoothPeripheral
+}
+
+export type RuuviTagData = Omit<RuuviTagBluetoothData, 'data'> & {
+  readonly data: RuuviTagBroadcast
 }
 
 /**
@@ -27,23 +33,25 @@ export interface RuuviTagBluetoothData {
  *
  * If one of the properties matches, the advertisement should be accepted.
  */
-export interface RuuviTagFilter {
-  readonly uuid?: string
-  readonly localName?: string
+export type RuuviTagIdentifier = {
+  readonly type: RuuviTagIdentifierType
+  readonly value: string
 }
 
 /**
- * Bluetooth/Ruuvi configuration for the gateway.
+ * Ruuvi/Bluetooth configuration for the gateway.
  */
-export interface BluetoothConfig {
+export type RuuviConfig = {
+  readonly scanMode?: boolean
   readonly serviceUuids?: string[]
-  // readonly ruuviTags: RuuviTagFilter[]
+  readonly filters?: RuuviTagIdentifier[]
+  readonly logMissedSequences?: boolean
 }
 
 /**
  * InfluxDB configuration for the gateway.
  */
-export interface InfluxConfig {
+export type InfluxConfig = {
   readonly url: string
   readonly token: string
   readonly bucket: string
@@ -55,10 +63,50 @@ export interface InfluxConfig {
   readonly gzipThreshold?: number
 }
 
+export type TspConfig = {
+  readonly url: string
+  readonly apiKey: string
+  readonly apiKeyHeader?: string
+  readonly intervalMs?: number
+  readonly bindings: TspRuuviBindingConfig
+}
+
+export type TspApiConfig = Pick<TspConfig, 'url' | 'apiKey' | 'apiKeyHeader'>
+
+export type TspRuuviBindingConfig = {
+  readonly tags: TspRuuviBindingTagConfig[]
+  readonly locations?: TspRuuviBindingLocationConfig[]
+}
+
+export type TspRuuviBindingTagConfig = {
+  readonly in: string
+  readonly out: string
+}
+
+export type TspRuuviBindingLocationConfig = {
+  readonly in: RuuviTagIdentifier
+  readonly out: string
+}
+
+export type TspMeasurementBatch = {
+  readonly tag: string
+  readonly location?: string
+  readonly data: {
+    readonly value: number
+    readonly timestamp: Date
+  }[]
+  readonly versionTimestamp?: Date
+}
+
+export type OutputConfig = {
+  readonly tsp?: TspConfig
+  readonly influx?: InfluxConfig
+}
+
 /**
  * Main configuration for the gateway.
  */
-export interface GatewayConfig {
-  readonly influx: InfluxConfig
-  readonly bluetooth?: BluetoothConfig
+export type RuuviCloudGatewayConfig = {
+  readonly ruuvi?: RuuviConfig
+  readonly outputs?: OutputConfig
 }

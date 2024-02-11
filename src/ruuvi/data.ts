@@ -1,5 +1,5 @@
 import { df3parser, df5parser } from 'ojousima.ruuvi_endpoints.ts'
-import { RuuviTagFieldKey, RuuviTagFieldType, RuuviTagParser } from './model'
+import { RuuviTagFieldKey, RuuviTagFieldType, RuuviTagParser } from '../model'
 
 // Ruuvi DF 3: https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-3-rawv1
 // Ruuvi DF 5: https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-5-rawv2
