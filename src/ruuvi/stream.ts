@@ -1,7 +1,7 @@
 import { Transform, TransformCallback } from 'stream'
 import { RuuviTagBroadcast } from 'ojousima.ruuvi_endpoints.ts'
-import { formatBluetoothPeripheral } from './bluetooth'
 import { getRuuviTagParser } from './data'
+import { formatBluetoothPeripheral } from './util'
 import { getLogger } from '../logger'
 import { BluetoothPeripheral, RuuviTagData, RuuviTagBluetoothData } from '../model'
 
