@@ -3,9 +3,8 @@ import { Transform, TransformCallback, Writable } from 'stream'
 import { InfluxDB, Point, WriteApi } from '@influxdata/influxdb-client'
 import { RuuviTagBroadcast } from 'ojousima.ruuvi_endpoints.ts'
 import { getLogger } from '../logger'
-import { BluetoothPeripheral, InfluxConfig, RuuviTagBluetoothData, RuuviTagData, RuuviTagFieldKey, RuuviTagFieldType } from '../model'
-import { formatBluetoothPeripheral } from '../ruuvi/bluetooth'
-import { RUUVI_TAG_FIELD_TYPES, getRuuviTagParser } from '../ruuvi/data'
+import { BluetoothPeripheral, InfluxConfig, RuuviTagData, RuuviTagFieldKey, RuuviTagFieldType } from '../model'
+import { RUUVI_TAG_FIELD_TYPES } from '../ruuvi/data'
 
 /**
  * Custom InfluxDB tag set by the gateway.
