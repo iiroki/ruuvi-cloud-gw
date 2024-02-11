@@ -17,13 +17,16 @@
     "lint": "eslint --ext .ts src"
   },
   "dependencies": {
-    "@abandonware/bluetooth-hci-socket": "^0.5.3-10",
     "@abandonware/noble": "^1.9.2-24",
     "@influxdata/influxdb-client": "^1.33.1",
+    "axios": "^1.6.7",
     "ojousima.ruuvi_endpoints.ts": "^4.0.0",
     "pino": "^8.8.0",
     "pino-pretty": "^9.1.1",
     "zod": "^3.20.2"
+  },
+  "optionalDependencies": {
+    "@abandonware/bluetooth-hci-socket": "^0.5.3-10"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",

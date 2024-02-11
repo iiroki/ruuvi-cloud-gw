@@ -1,6 +1,7 @@
 import { Readable } from 'stream'
 import noble from '@abandonware/noble'
 import { extractRuuviData } from './data'
+import { RuuviBluetoothTransform } from './transformer'
 import { getLogger } from '../logger'
 import { RuuviConfig, BluetoothPeripheral, RuuviTagBluetoothData } from '../model'
 
@@ -18,6 +19,8 @@ export class RuuviTagListener {
   private readonly ignoredRuuviPeripherals = new Set<string>()
   private readonly ruuviIdFilter?: Set<string>
   private readonly ruuviNameFilter?: Set<string>
+  private readonly rootPublisher: Readable
+
   public readonly publisher: Readable
 
   constructor(private readonly config: RuuviConfig = {}) {
@@ -43,12 +46,13 @@ export class RuuviTagListener {
       }
     }
 
-    this.publisher = new Readable({
+    this.rootPublisher = new Readable({
       objectMode: true,
       read: () => {/* NOP */},
       highWaterMark: 1024 // Make this configurable?
     })
 
+    this.publisher = this.rootPublisher.pipe(new RuuviBluetoothTransform(this.config.logMissedSequences))
     this.log.debug('Initialized')
   }
 
@@ -95,7 +99,7 @@ export class RuuviTagListener {
   }
 
   async destroy() {
-    this.publisher.push(null)
+    this.rootPublisher.push(null)
     await noble.stopScanningAsync()
     this.log.debug('Destroyed')
   }
@@ -142,7 +146,7 @@ export class RuuviTagListener {
   }
 
   private publish(data: RuuviTagBluetoothData) {
-    this.publisher.push(data)
+    this.rootPublisher.push(data)
   }
 }
 

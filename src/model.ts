@@ -24,6 +24,10 @@ export type RuuviTagBluetoothData = {
   readonly peripheral: BluetoothPeripheral
 }
 
+export type RuuviTagData = Omit<RuuviTagBluetoothData, 'data'> & {
+  readonly data: RuuviTagBroadcast
+}
+
 /**
  * RuuviTag Bluetooth advertisement filter.
  *
@@ -41,6 +45,7 @@ export type RuuviConfig = {
   readonly scanMode?: boolean
   readonly serviceUuids?: string[]
   readonly filters?: RuuviTagIdentifier[]
+  readonly logMissedSequences?: boolean
 }
 
 /**
@@ -66,6 +71,8 @@ export type TspConfig = {
   readonly bindings: TspRuuviBindingConfig
 }
 
+export type TspApiConfig = Pick<TspConfig, 'url' | 'apiKey' | 'apiKeyHeader'>
+
 export type TspRuuviBindingConfig = {
   readonly tags: TspRuuviBindingTagConfig[]
   readonly locations?: TspRuuviBindingLocationConfig[]
@@ -87,7 +94,7 @@ export type TspMeasurementBatch = {
   readonly data: {
     readonly value: number
     readonly timestamp: Date
-  }
+  }[]
   readonly versionTimestamp?: Date
 }
 
