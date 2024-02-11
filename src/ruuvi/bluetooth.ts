@@ -8,10 +8,6 @@ import { RuuviConfig, BluetoothPeripheral, RuuviTagBluetoothData } from '../mode
 /**
  * `RuuviTagListener` listens for RuuviTag Bluetooth advertisements and publishes
  * them to the `publisher` stream in `RuuviBluetoothData` format.
- *
- * **TODO:**
- * The RuuviTag advertisements whose values are published can be configured
- * with the Bluetooth configuration and its RuuviTag filters.
  */
 export class RuuviTagListener {
   private readonly log = getLogger('RuuviTagListener')
