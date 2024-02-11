@@ -49,7 +49,6 @@ export const createInfluxWriteApi = (influxConfig: InfluxConfig) => {
 
 export class RuuviInfluxTransform extends Transform {
   private readonly log = getLogger('RuuviInfluxTransform')
-  private readonly measurementSequences: Map<string, number> = new Map()
 
   constructor(private readonly influxMeasurement = 'ruuvi') {
     super({ readableObjectMode: true, writableObjectMode: true })
@@ -99,36 +98,6 @@ export class RuuviInfluxTransform extends Transform {
     })
 
     return point
-  }
-
-  /**
-   * Updates a measurement sequence to cache if the measurement sequence does not already exist.
-   * Returns `true` if the measurement sequence was updated.
-   */
-  private updateMeasurementSequence(parsed: RuuviTagBroadcast, peripheral: BluetoothPeripheral): boolean {
-    const { measurementSequence } = parsed
-    if (measurementSequence === null) {
-      return false
-    }
-
-    // Update measurement sequence if it doesn't exist or a newer was received
-    const latest = this.measurementSequences.get(peripheral.id)
-    const shouldUpdate = latest === undefined || measurementSequence !== latest
-    if (shouldUpdate) {
-      this.measurementSequences.set(peripheral.id, measurementSequence)
-    }
-
-    if (latest !== undefined) {
-      // This does not work if "measurementSequence" wraps around, but that's a price we're willing to pay :)
-      const diff = measurementSequence - latest
-      if (diff > 1) {
-        this.log.warn(
-          `Missed measurements for '${formatBluetoothPeripheral(peripheral)}': ${diff - 1} measurements`
-        )
-      }
-    }
-
-    return shouldUpdate
   }
 }
 

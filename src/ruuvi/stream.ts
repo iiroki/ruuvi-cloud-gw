@@ -42,7 +42,7 @@ export class RuuviBluetoothTransform extends Transform {
       return false
     }
 
-    // Update measurement sequence if it doesn't exist or a newer was received
+    // Update the sequence if it doesn't exist or a newer was received
     const latest = this.sequences.get(peripheral.id)
     const shouldUpdate = latest === undefined || measurementSequence !== latest
     if (shouldUpdate) {
@@ -50,7 +50,7 @@ export class RuuviBluetoothTransform extends Transform {
     }
 
     if (this.logMissedSequences && latest !== undefined) {
-      // This does not work if "measurementSequence" wraps around, but that's a price we're willing to pay :)
+      // This does not work if "measurementSequence" overflows, but that's a price we're willing to pay :)
       const diff = measurementSequence - latest
       if (diff > 1) {
         this.log.warn(

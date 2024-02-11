@@ -1,7 +1,7 @@
 import { Readable } from 'stream'
 import noble from '@abandonware/noble'
 import { extractRuuviData } from './data'
-import { RuuviBluetoothTransform } from './transformer'
+import { RuuviBluetoothTransform } from './stream'
 import { getLogger } from '../logger'
 import { RuuviConfig, BluetoothPeripheral, RuuviTagBluetoothData } from '../model'
 
