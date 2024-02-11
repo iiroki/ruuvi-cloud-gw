@@ -9,7 +9,7 @@ collects data from RuuviTags and send them to various cloud outputs.
 
 **Features:**
 - Collect data from RuuviTags
-- Transform Ruuvi data to InfluxDB-compatible format
+- Transform RuuviTag data to cloud-compatible formats
 - Send data to cloud:
     - [Time Series Platform](https://github.com/iiroki/time-series-platform) (my personal time series storage)
     - [InfluxDB](https://www.influxdata.com/)

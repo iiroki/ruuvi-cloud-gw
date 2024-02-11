@@ -138,7 +138,14 @@ export class RuuviTagListener {
     return { data, timestamp, peripheral: this.toBluetoothPeripheral(peripheral) }
   }
 
-  private toBluetoothPeripheral({ id, uuid, address, addressType, advertisement, state }: noble.Peripheral): BluetoothPeripheral {
+  private toBluetoothPeripheral({
+    id,
+    uuid,
+    address,
+    addressType,
+    advertisement,
+    state
+  }: noble.Peripheral): BluetoothPeripheral {
     return { id, uuid, address, addressType, advertisement, state }
   }
 

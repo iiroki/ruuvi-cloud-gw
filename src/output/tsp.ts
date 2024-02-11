@@ -1,7 +1,7 @@
 import { Transform, TransformCallback, Writable } from 'stream'
 import axios from 'axios'
 import { getLogger } from '../logger'
-import { RuuviTagData, RuuviTagIdentifier, TspApiConfig, TspConfig, TspMeasurementBatch, TspRuuviBindingConfig } from '../model'
+import { RuuviTagData, RuuviTagIdentifier, TspApiConfig, TspMeasurementBatch, TspRuuviBindingConfig } from '../model'
 
 type TspSender = (measurements: TspMeasurementBatch[]) => Promise<void>
 

@@ -1,6 +1,16 @@
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'fs'
 import { z } from 'zod'
-import { InfluxConfig, OutputConfig, RuuviCloudGatewayConfig, RuuviConfig, RuuviTagIdentifier, TspConfig, TspRuuviBindingConfig, TspRuuviBindingLocationConfig, TspRuuviBindingTagConfig } from './model'
+import {
+  InfluxConfig,
+  OutputConfig,
+  RuuviCloudGatewayConfig,
+  RuuviConfig,
+  RuuviTagIdentifier,
+  TspConfig,
+  TspRuuviBindingConfig,
+  TspRuuviBindingLocationConfig,
+  TspRuuviBindingTagConfig
+} from './model'
 import { replacePropertiesFromEnv } from './util'
 
 const CONFIG_PATH = process.env.CONFIG_PATH ?? 'config.json'
