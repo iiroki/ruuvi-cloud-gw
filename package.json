@@ -10,9 +10,10 @@
   },
   "scripts": {
     "start": "NODE_ENV=production node dist/index.js",
+    "prestart": "npm run build:prod",
     "dev": "npm run build && NODE_ENV=development node dist/index.js",
     "build": "tsc",
-    "build:prod": "tsc && npm prune --omit=dev",
+    "build:prod": "tsc -p tsconfig.prod.json && npm prune --omit=dev",
     "test": "NODE_ENV=test jest",
     "lint": "eslint --ext .ts src"
   },

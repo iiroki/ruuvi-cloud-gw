@@ -4,6 +4,8 @@ import { createOutputStream } from './output'
 import { RuuviTagListener } from './ruuvi/bluetooth'
 
 const log = getLogger('RuuviCloudGw')
+log.info('===== RUUVI CLOUD GATEWAY =====')
+
 const config = readConfigFromFile()
 if (!config.outputs && !config.ruuvi?.scanMode) {
   log.warn('No outputs defined')
